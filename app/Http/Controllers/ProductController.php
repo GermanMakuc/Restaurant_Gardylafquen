@@ -33,7 +33,7 @@ class ProductController extends Controller
     {
         request()->validate([
             'name' => 'required|string',
-            'photo' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'photo' => 'required|file|mimes:jpeg,png,jpg',
             'category_id' => 'required',
             'description' => 'max:500',
             'price' => 'required|numeric'

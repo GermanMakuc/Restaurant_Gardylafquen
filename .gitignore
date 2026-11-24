@@ -1,0 +1,47 @@
+# Dependencias
+/vendor
+/node_modules
+
+# Entorno / secretos
+.env
+.env.backup
+.env.*.local
+
+# Laravel
+/public/hot
+/public/storage
+/storage/*.key
+/storage/logs/*.log
+Homestead.json
+Homestead.yaml
+auth.json
+.phpunit.result.cache
+.phpunit.cache
+.php-cs-fixer.cache
+.phpstan.cache
+
+# Logs
+npm-debug.log
+yarn-error.log
+*.log
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# IDEs / editores
+.idea/
+.vscode/
+.fleet/
+.vs/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*~
+
+# Temporales
+*.tmp
+*.bak
+Thumbs.db

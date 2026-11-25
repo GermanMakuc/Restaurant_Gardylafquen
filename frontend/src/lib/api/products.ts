@@ -4,11 +4,15 @@ import type {
   ProductInput,
   ProductListQuery,
 } from '../../types/product';
-import { apiFetch } from './client';
+import {
+  apiFetch,
+  normalizeApiContext,
+  type ApiRequestContext,
+} from './client';
 
 export async function listProducts(
   query: ProductListQuery = {},
-  baseUrl?: string,
+  context?: ApiRequestContext,
 ): Promise<PaginatedResponse<Product>> {
   const params = new URLSearchParams();
 
@@ -33,18 +37,18 @@ export async function listProducts(
 
   return apiFetch<PaginatedResponse<Product>>(
     path,
-    baseUrl !== undefined ? { baseUrl } : {},
+    normalizeApiContext(context),
   );
 }
 
 export async function createProduct(
   input: ProductInput,
-  baseUrl?: string,
+  context?: ApiRequestContext,
 ): Promise<Product> {
   const response = await apiFetch<ApiResource<Product>>('/products', {
     method: 'POST',
     body: JSON.stringify(input),
-    ...(baseUrl !== undefined ? { baseUrl } : {}),
+    ...normalizeApiContext(context),
   });
   return response.data;
 }
@@ -52,12 +56,12 @@ export async function createProduct(
 export async function updateProduct(
   id: number,
   input: ProductInput,
-  baseUrl?: string,
+  context?: ApiRequestContext,
 ): Promise<Product> {
   const response = await apiFetch<ApiResource<Product>>(`/products/${id}`, {
     method: 'PUT',
     body: JSON.stringify(input),
-    ...(baseUrl !== undefined ? { baseUrl } : {}),
+    ...normalizeApiContext(context),
   });
   return response.data;
 }
@@ -65,7 +69,7 @@ export async function updateProduct(
 export async function uploadProductImage(
   id: number,
   file: File,
-  baseUrl?: string,
+  context?: ApiRequestContext,
 ): Promise<Product> {
   const formData = new FormData();
   formData.append('image', file);
@@ -75,7 +79,7 @@ export async function uploadProductImage(
     {
       method: 'POST',
       body: formData,
-      ...(baseUrl !== undefined ? { baseUrl } : {}),
+      ...normalizeApiContext(context),
     },
   );
   return response.data;
@@ -83,10 +87,10 @@ export async function uploadProductImage(
 
 export async function deleteProduct(
   id: number,
-  baseUrl?: string,
+  context?: ApiRequestContext,
 ): Promise<void> {
   await apiFetch<undefined>(`/products/${id}`, {
     method: 'DELETE',
-    ...(baseUrl !== undefined ? { baseUrl } : {}),
+    ...normalizeApiContext(context),
   });
 }

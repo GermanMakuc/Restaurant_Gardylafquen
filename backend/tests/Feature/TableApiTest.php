@@ -13,6 +13,12 @@ final class TableApiTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->actingAsRole();
+    }
+
     public function test_index_returns_paginated_tables_filtered_by_status(): void
     {
         factory(Table::class)->create(['number' => 2, 'status' => TableStatus::OCCUPIED]);

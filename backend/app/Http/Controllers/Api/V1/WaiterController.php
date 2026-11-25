@@ -9,6 +9,7 @@ use App\Http\Requests\Waiter\ListWaitersRequest;
 use App\Http\Requests\Waiter\StoreWaiterRequest;
 use App\Http\Requests\Waiter\UpdateWaiterRequest;
 use App\Http\Resources\WaiterResource;
+use App\Models\Waiter;
 use App\Services\WaiterService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -24,6 +25,8 @@ final class WaiterController extends Controller
 
     public function index(ListWaitersRequest $request): AnonymousResourceCollection
     {
+        $this->authorize('viewAny', Waiter::class);
+
         $waiters = $this->service->list($request->toDto());
 
         return WaiterResource::collection($waiters);
@@ -31,6 +34,8 @@ final class WaiterController extends Controller
 
     public function store(StoreWaiterRequest $request): JsonResponse
     {
+        $this->authorize('create', Waiter::class);
+
         $waiter = $this->service->create($request->toDto());
 
         $response = WaiterResource::make($waiter)->response();
@@ -42,11 +47,15 @@ final class WaiterController extends Controller
 
     public function show(string $waiter): WaiterResource
     {
+        $this->authorize('view', Waiter::class);
+
         return WaiterResource::make($this->service->findOrFail((int) $waiter));
     }
 
     public function update(UpdateWaiterRequest $request, string $waiter): WaiterResource
     {
+        $this->authorize('update', Waiter::class);
+
         $updated = $this->service->update((int) $waiter, $request->toDto());
 
         return WaiterResource::make($updated);
@@ -54,6 +63,8 @@ final class WaiterController extends Controller
 
     public function destroy(string $waiter): JsonResponse
     {
+        $this->authorize('delete', Waiter::class);
+
         $this->service->delete((int) $waiter);
 
         return new JsonResponse(null, 204);

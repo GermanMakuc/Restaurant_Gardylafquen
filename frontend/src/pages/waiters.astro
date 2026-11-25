@@ -2,9 +2,15 @@
 import WaitersManager from '../features/waiters/WaitersManager.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { listWaiters } from '../lib/api/waiters';
+import { resolveServerSession } from '../lib/auth/session';
 import { es } from '../lib/i18n/es';
 import type { PaginatedResponse } from '../types/api';
 import type { Waiter } from '../types/waiter';
+
+const session = await resolveServerSession(Astro.cookies);
+if (session === null) {
+  return Astro.redirect('/login');
+}
 
 const searchQuery = Astro.url.searchParams.get('q') ?? '';
 const activeFilter = Astro.url.searchParams.get('active') ?? '';
@@ -15,27 +21,33 @@ let result: PaginatedResponse<Waiter> | null = null;
 let loadFailed = false;
 
 try {
-  result = await listWaiters({
-    name: searchQuery,
-    ...(activeFilter === 'true'
-      ? { isActive: true }
-      : activeFilter === 'false'
-        ? { isActive: false }
-        : {}),
-    sort: '-created_at',
-    page: currentPage,
-    perPage: 15,
-  });
+  result = await listWaiters(
+    {
+      name: searchQuery,
+      ...(activeFilter === 'true'
+        ? { isActive: true }
+        : activeFilter === 'false'
+          ? { isActive: false }
+          : {}),
+      sort: '-created_at',
+      page: currentPage,
+      perPage: 15,
+    },
+    { token: session.token },
+  );
 } catch {
   loadFailed = true;
 }
+
+const canManage = session.user.role === 'admin';
 ---
 
-<BaseLayout title={es.waiters.pageTitle}>
+<BaseLayout title={es.waiters.pageTitle} user={session.user}>
   <WaitersManager
     result={result}
     searchQuery={searchQuery}
     activeFilter={activeFilter}
     loadFailed={loadFailed}
+    canManage={canManage}
   />
 </BaseLayout>

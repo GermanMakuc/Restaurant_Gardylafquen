@@ -9,6 +9,7 @@ use App\Http\Requests\Sale\ListSalesRequest;
 use App\Http\Requests\Sale\StoreSaleRequest;
 use App\Http\Resources\SaleResource;
 use App\Http\Resources\SalesSummaryResource;
+use App\Models\Sale;
 use App\Services\SaleService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -24,6 +25,8 @@ final class SaleController extends Controller
 
     public function index(ListSalesRequest $request): AnonymousResourceCollection
     {
+        $this->authorize('viewAny', Sale::class);
+
         $sales = $this->service->list($request->toDto());
 
         return SaleResource::collection($sales);
@@ -31,11 +34,15 @@ final class SaleController extends Controller
 
     public function summary(ListSalesRequest $request): SalesSummaryResource
     {
+        $this->authorize('viewAny', Sale::class);
+
         return SalesSummaryResource::make($this->service->summary($request->toDto()));
     }
 
     public function store(StoreSaleRequest $request): JsonResponse
     {
+        $this->authorize('create', Sale::class);
+
         $sale = $this->service->create($request->toDto());
 
         $response = SaleResource::make($sale)->response();
@@ -47,6 +54,8 @@ final class SaleController extends Controller
 
     public function show(string $sale): SaleResource
     {
+        $this->authorize('view', Sale::class);
+
         return SaleResource::make($this->service->findOrFail((int) $sale));
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 $finder = PhpCsFixer\Finder::create()
     ->in([
+        __DIR__ . '/app/Auth',
         __DIR__ . '/app/DTOs',
         __DIR__ . '/app/Enums',
         __DIR__ . '/app/Exceptions',

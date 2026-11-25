@@ -14,6 +14,7 @@ export const es = {
     tables: 'Mesas',
     products: 'Productos',
     categories: 'Categorías',
+    logout: 'Cerrar sesión',
   },
   home: {
     pageTitle: 'Inicio | Restaurant Gardylafquen',
@@ -385,5 +386,33 @@ export const es = {
     receiptTitle: (id: number): string => `Ticket de venta #${id}`,
     receiptPrintButton: 'Imprimir',
     closeButton: 'Cerrar',
+  },
+  auth: {
+    pageTitle: 'Iniciar sesión | Restaurant Gardylafquen',
+    heading: 'Iniciar sesión',
+    subtitle:
+      'Ingresa tus credenciales para acceder al panel de administración y salón.',
+    emailLabel: 'Correo electrónico',
+    emailPlaceholder: 'correo@gardylafquen.test',
+    passwordLabel: 'Contraseña',
+    showPassword: 'Mostrar',
+    hidePassword: 'Ocultar',
+    showPasswordAria: 'Mostrar u ocultar contraseña',
+    submitButton: 'Iniciar sesión',
+    submittingButton: 'Ingresando…',
+    invalidCredentials: 'El correo o la contraseña no son válidos.',
+    validationEmail: 'Ingresa un correo electrónico válido.',
+    validationPassword: 'Ingresa tu contraseña.',
+    sessionExpired: 'Tu sesión expiró. Inicia sesión nuevamente.',
+    unexpectedError: 'No se pudo completar el inicio de sesión.',
+    logoutButton: 'Cerrar sesión',
+    forbiddenTitle: 'Acceso restringido',
+    forbiddenSales:
+      'Solo administración y caja pueden consultar el historial de ventas.',
+    roleLabels: {
+      admin: 'Administrador',
+      cashier: 'Caja',
+      waiter: 'Mesero',
+    },
   },
 } as const;

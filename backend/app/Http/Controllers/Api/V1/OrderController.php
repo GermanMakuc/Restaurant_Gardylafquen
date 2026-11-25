@@ -10,6 +10,7 @@ use App\Http\Requests\Order\StoreOrderRequest;
 use App\Http\Requests\Order\UpdateOrderRequest;
 use App\Http\Requests\Order\UpdateOrderStatusRequest;
 use App\Http\Resources\OrderResource;
+use App\Models\Order;
 use App\Services\OrderService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -25,6 +26,8 @@ final class OrderController extends Controller
 
     public function index(ListOrdersRequest $request): AnonymousResourceCollection
     {
+        $this->authorize('viewAny', Order::class);
+
         $orders = $this->service->list($request->toDto());
 
         return OrderResource::collection($orders);
@@ -32,6 +35,8 @@ final class OrderController extends Controller
 
     public function store(StoreOrderRequest $request): JsonResponse
     {
+        $this->authorize('create', Order::class);
+
         $order = $this->service->create($request->toDto());
 
         $response = OrderResource::make($order)->response();
@@ -43,11 +48,15 @@ final class OrderController extends Controller
 
     public function show(string $order): OrderResource
     {
+        $this->authorize('view', Order::class);
+
         return OrderResource::make($this->service->findOrFail((int) $order));
     }
 
     public function update(UpdateOrderRequest $request, string $order): OrderResource
     {
+        $this->authorize('update', Order::class);
+
         $updated = $this->service->update((int) $order, $request->toDto());
 
         return OrderResource::make($updated);
@@ -55,6 +64,8 @@ final class OrderController extends Controller
 
     public function updateStatus(UpdateOrderStatusRequest $request, string $order): OrderResource
     {
+        $this->authorize('update', Order::class);
+
         $updated = $this->service->updateStatus((int) $order, $request->toDto());
 
         return OrderResource::make($updated);
@@ -62,6 +73,8 @@ final class OrderController extends Controller
 
     public function destroy(string $order): JsonResponse
     {
+        $this->authorize('delete', Order::class);
+
         $this->service->delete((int) $order);
 
         return new JsonResponse(null, 204);

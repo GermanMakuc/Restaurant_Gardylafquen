@@ -16,6 +16,12 @@ final class OrderApiTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->actingAsRole();
+    }
+
     public function test_store_creates_order_computes_subtotal_and_occupies_table(): void
     {
         /** @var Table $table */

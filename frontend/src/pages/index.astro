@@ -2,8 +2,14 @@
 import HealthBadge from '../features/system/HealthBadge.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getHealthStatus } from '../lib/api/health';
+import { resolveServerSession } from '../lib/auth/session';
 import { es } from '../lib/i18n/es';
 import type { HealthStatus } from '../types/api';
+
+const session = await resolveServerSession(Astro.cookies);
+if (session === null) {
+  return Astro.redirect('/login');
+}
 
 let health: HealthStatus | null = null;
 
@@ -12,9 +18,16 @@ try {
 } catch {
   health = null;
 }
+
+const visibleModules = es.home.modules.filter(
+  (mod) =>
+    mod.href !== '/sales' ||
+    session.user.role === 'admin' ||
+    session.user.role === 'cashier',
+);
 ---
 
-<BaseLayout title={es.home.pageTitle}>
+<BaseLayout title={es.home.pageTitle} user={session.user}>
   <section class="space-y-8">
     <div class="space-y-2">
       <h1 class="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
@@ -33,7 +46,7 @@ try {
       </h2>
 
       <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {es.home.modules.map((mod) => {
+        {visibleModules.map((mod) => {
           const href = 'href' in mod ? mod.href : undefined;
           return (
             <li class="flex flex-col justify-between rounded-xl border border-border bg-surface-card p-5 shadow-xs">

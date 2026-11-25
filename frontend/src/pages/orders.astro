@@ -5,12 +5,18 @@ import { listOrders } from '../lib/api/orders';
 import { listProducts } from '../lib/api/products';
 import { listTables } from '../lib/api/tables';
 import { listWaiters } from '../lib/api/waiters';
+import { resolveServerSession } from '../lib/auth/session';
 import { es } from '../lib/i18n/es';
 import type { PaginatedResponse } from '../types/api';
 import type { Order, OrderStatus } from '../types/order';
 import type { Product } from '../types/product';
 import type { RestaurantTable } from '../types/table';
 import type { Waiter } from '../types/waiter';
+
+const session = await resolveServerSession(Astro.cookies);
+if (session === null) {
+  return Astro.redirect('/login');
+}
 
 const rawStatus = Astro.url.searchParams.get('status') ?? '';
 const allowed: OrderStatus[] = ['waiting', 'served', 'paid', 'cancelled'];
@@ -27,16 +33,20 @@ let products: Product[] = [];
 let loadFailed = false;
 
 try {
+  const ctx = { token: session.token };
   const [ordersRes, tablesRes, waitersRes, productsRes] = await Promise.all([
-    listOrders({
-      ...(selectedStatus !== '' ? { status: selectedStatus } : {}),
-      sort: '-created_at',
-      page: currentPage,
-      perPage: 15,
-    }),
-    listTables({ sort: 'number', perPage: 100 }),
-    listWaiters({ isActive: true, sort: 'name', perPage: 100 }),
-    listProducts({ sort: 'name', perPage: 100 }),
+    listOrders(
+      {
+        ...(selectedStatus !== '' ? { status: selectedStatus } : {}),
+        sort: '-created_at',
+        page: currentPage,
+        perPage: 15,
+      },
+      ctx,
+    ),
+    listTables({ sort: 'number', perPage: 100 }, ctx),
+    listWaiters({ isActive: true, sort: 'name', perPage: 100 }, ctx),
+    listProducts({ sort: 'name', perPage: 100 }, ctx),
   ]);
 
   result = ordersRes;
@@ -46,9 +56,14 @@ try {
 } catch {
   loadFailed = true;
 }
+
+const canEditOrders =
+  session.user.role === 'admin' || session.user.role === 'waiter';
+const canCheckout =
+  session.user.role === 'admin' || session.user.role === 'cashier';
 ---
 
-<BaseLayout title={es.orders.pageTitle}>
+<BaseLayout title={es.orders.pageTitle} user={session.user}>
   <OrdersManager
     result={result}
     tables={tables}
@@ -56,5 +71,7 @@ try {
     products={products}
     selectedStatus={selectedStatus}
     loadFailed={loadFailed}
+    canEditOrders={canEditOrders}
+    canCheckout={canCheckout}
   />
 </BaseLayout>

@@ -15,6 +15,12 @@ final class ProductApiTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->actingAsRole();
+    }
+
     public function test_index_returns_paginated_products_filtered_by_name_and_category(): void
     {
         /** @var Category $drinks */

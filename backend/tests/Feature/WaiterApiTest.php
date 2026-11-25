@@ -12,6 +12,12 @@ final class WaiterApiTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->actingAsRole();
+    }
+
     public function test_index_returns_paginated_waiters_with_filters(): void
     {
         factory(Waiter::class)->create(['name' => 'Camila Rojas', 'is_active' => true]);

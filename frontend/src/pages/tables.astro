@@ -2,9 +2,15 @@
 import TablesManager from '../features/tables/TablesManager.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { listTables } from '../lib/api/tables';
+import { resolveServerSession } from '../lib/auth/session';
 import { es } from '../lib/i18n/es';
 import type { PaginatedResponse } from '../types/api';
 import type { RestaurantTable, TableStatus } from '../types/table';
+
+const session = await resolveServerSession(Astro.cookies);
+if (session === null) {
+  return Astro.redirect('/login');
+}
 
 const rawStatus = Astro.url.searchParams.get('status') ?? '';
 const allowed: TableStatus[] = [
@@ -23,21 +29,27 @@ let result: PaginatedResponse<RestaurantTable> | null = null;
 let loadFailed = false;
 
 try {
-  result = await listTables({
-    ...(selectedStatus !== '' ? { status: selectedStatus } : {}),
-    sort: 'number',
-    page: currentPage,
-    perPage: 20,
-  });
+  result = await listTables(
+    {
+      ...(selectedStatus !== '' ? { status: selectedStatus } : {}),
+      sort: 'number',
+      page: currentPage,
+      perPage: 20,
+    },
+    { token: session.token },
+  );
 } catch {
   loadFailed = true;
 }
+
+const canManage = session.user.role === 'admin';
 ---
 
-<BaseLayout title={es.tables.pageTitle}>
+<BaseLayout title={es.tables.pageTitle} user={session.user}>
   <TablesManager
     result={result}
     selectedStatus={selectedStatus}
     loadFailed={loadFailed}
+    canManage={canManage}
   />
 </BaseLayout>

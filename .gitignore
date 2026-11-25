@@ -27,6 +27,7 @@
 /backend/public/storage
 /backend/storage/*.key
 /backend/storage/logs/*.log
+/backend/storage/framework/testing/
 Homestead.json
 Homestead.yaml
 auth.json

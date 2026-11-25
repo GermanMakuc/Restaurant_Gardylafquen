@@ -5,11 +5,15 @@ import type {
   OrderListQuery,
   OrderStatus,
 } from '../../types/order';
-import { apiFetch } from './client';
+import {
+  apiFetch,
+  normalizeApiContext,
+  type ApiRequestContext,
+} from './client';
 
 export async function listOrders(
   query: OrderListQuery = {},
-  baseUrl?: string,
+  context?: ApiRequestContext,
 ): Promise<PaginatedResponse<Order>> {
   const params = new URLSearchParams();
 
@@ -35,20 +39,17 @@ export async function listOrders(
   const qs = params.toString();
   const path = qs.length > 0 ? `/orders?${qs}` : '/orders';
 
-  return apiFetch<PaginatedResponse<Order>>(
-    path,
-    baseUrl !== undefined ? { baseUrl } : {},
-  );
+  return apiFetch<PaginatedResponse<Order>>(path, normalizeApiContext(context));
 }
 
 export async function createOrder(
   input: OrderInput,
-  baseUrl?: string,
+  context?: ApiRequestContext,
 ): Promise<Order> {
   const response = await apiFetch<ApiResource<Order>>('/orders', {
     method: 'POST',
     body: JSON.stringify(input),
-    ...(baseUrl !== undefined ? { baseUrl } : {}),
+    ...normalizeApiContext(context),
   });
   return response.data;
 }
@@ -56,12 +57,12 @@ export async function createOrder(
 export async function updateOrder(
   id: number,
   input: OrderInput,
-  baseUrl?: string,
+  context?: ApiRequestContext,
 ): Promise<Order> {
   const response = await apiFetch<ApiResource<Order>>(`/orders/${id}`, {
     method: 'PUT',
     body: JSON.stringify(input),
-    ...(baseUrl !== undefined ? { baseUrl } : {}),
+    ...normalizeApiContext(context),
   });
   return response.data;
 }
@@ -69,19 +70,22 @@ export async function updateOrder(
 export async function updateOrderStatus(
   id: number,
   status: Extract<OrderStatus, 'waiting' | 'served' | 'cancelled'>,
-  baseUrl?: string,
+  context?: ApiRequestContext,
 ): Promise<Order> {
   const response = await apiFetch<ApiResource<Order>>(`/orders/${id}/status`, {
     method: 'PATCH',
     body: JSON.stringify({ status }),
-    ...(baseUrl !== undefined ? { baseUrl } : {}),
+    ...normalizeApiContext(context),
   });
   return response.data;
 }
 
-export async function deleteOrder(id: number, baseUrl?: string): Promise<void> {
+export async function deleteOrder(
+  id: number,
+  context?: ApiRequestContext,
+): Promise<void> {
   await apiFetch<undefined>(`/orders/${id}`, {
     method: 'DELETE',
-    ...(baseUrl !== undefined ? { baseUrl } : {}),
+    ...normalizeApiContext(context),
   });
 }

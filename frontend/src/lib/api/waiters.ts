@@ -1,10 +1,14 @@
 import type { ApiResource, PaginatedResponse } from '../../types/api';
 import type { Waiter, WaiterInput, WaiterListQuery } from '../../types/waiter';
-import { apiFetch } from './client';
+import {
+  apiFetch,
+  normalizeApiContext,
+  type ApiRequestContext,
+} from './client';
 
 export async function listWaiters(
   query: WaiterListQuery = {},
-  baseUrl?: string,
+  context?: ApiRequestContext,
 ): Promise<PaginatedResponse<Waiter>> {
   const params = new URLSearchParams();
 
@@ -29,18 +33,18 @@ export async function listWaiters(
 
   return apiFetch<PaginatedResponse<Waiter>>(
     path,
-    baseUrl !== undefined ? { baseUrl } : {},
+    normalizeApiContext(context),
   );
 }
 
 export async function createWaiter(
   input: WaiterInput,
-  baseUrl?: string,
+  context?: ApiRequestContext,
 ): Promise<Waiter> {
   const response = await apiFetch<ApiResource<Waiter>>('/waiters', {
     method: 'POST',
     body: JSON.stringify(input),
-    ...(baseUrl !== undefined ? { baseUrl } : {}),
+    ...normalizeApiContext(context),
   });
   return response.data;
 }
@@ -48,22 +52,22 @@ export async function createWaiter(
 export async function updateWaiter(
   id: number,
   input: WaiterInput,
-  baseUrl?: string,
+  context?: ApiRequestContext,
 ): Promise<Waiter> {
   const response = await apiFetch<ApiResource<Waiter>>(`/waiters/${id}`, {
     method: 'PUT',
     body: JSON.stringify(input),
-    ...(baseUrl !== undefined ? { baseUrl } : {}),
+    ...normalizeApiContext(context),
   });
   return response.data;
 }
 
 export async function deleteWaiter(
   id: number,
-  baseUrl?: string,
+  context?: ApiRequestContext,
 ): Promise<void> {
   await apiFetch<undefined>(`/waiters/${id}`, {
     method: 'DELETE',
-    ...(baseUrl !== undefined ? { baseUrl } : {}),
+    ...normalizeApiContext(context),
   });
 }

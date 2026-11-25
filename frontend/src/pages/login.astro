@@ -1,0 +1,23 @@
+---
+import LoginForm from '../features/auth/LoginForm.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { resolveServerSession } from '../lib/auth/session';
+import { es } from '../lib/i18n/es';
+
+const session = await resolveServerSession(Astro.cookies);
+if (session !== null) {
+  return Astro.redirect('/');
+}
+
+const errorParam = Astro.url.searchParams.get('error');
+const initialError =
+  errorParam === 'invalid'
+    ? es.auth.invalidCredentials
+    : errorParam === 'server'
+      ? es.auth.unexpectedError
+      : null;
+---
+
+<BaseLayout title={es.auth.pageTitle} user={null}>
+  <LoginForm initialError={initialError} />
+</BaseLayout>

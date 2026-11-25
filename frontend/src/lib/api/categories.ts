@@ -4,11 +4,15 @@ import type {
   CategoryInput,
   CategoryListQuery,
 } from '../../types/category';
-import { apiFetch } from './client';
+import {
+  apiFetch,
+  normalizeApiContext,
+  type ApiRequestContext,
+} from './client';
 
 export async function listCategories(
   query: CategoryListQuery = {},
-  baseUrl?: string,
+  context?: ApiRequestContext,
 ): Promise<PaginatedResponse<Category>> {
   const params = new URLSearchParams();
 
@@ -30,18 +34,18 @@ export async function listCategories(
 
   return apiFetch<PaginatedResponse<Category>>(
     path,
-    baseUrl !== undefined ? { baseUrl } : {},
+    normalizeApiContext(context),
   );
 }
 
 export async function createCategory(
   input: CategoryInput,
-  baseUrl?: string,
+  context?: ApiRequestContext,
 ): Promise<Category> {
   const response = await apiFetch<ApiResource<Category>>('/categories', {
     method: 'POST',
     body: JSON.stringify(input),
-    ...(baseUrl !== undefined ? { baseUrl } : {}),
+    ...normalizeApiContext(context),
   });
   return response.data;
 }
@@ -49,22 +53,22 @@ export async function createCategory(
 export async function updateCategory(
   id: number,
   input: CategoryInput,
-  baseUrl?: string,
+  context?: ApiRequestContext,
 ): Promise<Category> {
   const response = await apiFetch<ApiResource<Category>>(`/categories/${id}`, {
     method: 'PUT',
     body: JSON.stringify(input),
-    ...(baseUrl !== undefined ? { baseUrl } : {}),
+    ...normalizeApiContext(context),
   });
   return response.data;
 }
 
 export async function deleteCategory(
   id: number,
-  baseUrl?: string,
+  context?: ApiRequestContext,
 ): Promise<void> {
   await apiFetch<undefined>(`/categories/${id}`, {
     method: 'DELETE',
-    ...(baseUrl !== undefined ? { baseUrl } : {}),
+    ...normalizeApiContext(context),
   });
 }

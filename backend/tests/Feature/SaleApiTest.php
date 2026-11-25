@@ -17,6 +17,12 @@ final class SaleApiTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->actingAsRole();
+    }
+
     public function test_store_closes_order_creates_sale_and_frees_table(): void
     {
         /** @var Table $table */

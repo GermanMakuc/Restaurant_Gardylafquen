@@ -4,11 +4,15 @@ import type {
   TableInput,
   TableListQuery,
 } from '../../types/table';
-import { apiFetch } from './client';
+import {
+  apiFetch,
+  normalizeApiContext,
+  type ApiRequestContext,
+} from './client';
 
 export async function listTables(
   query: TableListQuery = {},
-  baseUrl?: string,
+  context?: ApiRequestContext,
 ): Promise<PaginatedResponse<RestaurantTable>> {
   const params = new URLSearchParams();
 
@@ -30,18 +34,18 @@ export async function listTables(
 
   return apiFetch<PaginatedResponse<RestaurantTable>>(
     path,
-    baseUrl !== undefined ? { baseUrl } : {},
+    normalizeApiContext(context),
   );
 }
 
 export async function createTable(
   input: TableInput,
-  baseUrl?: string,
+  context?: ApiRequestContext,
 ): Promise<RestaurantTable> {
   const response = await apiFetch<ApiResource<RestaurantTable>>('/tables', {
     method: 'POST',
     body: JSON.stringify(input),
-    ...(baseUrl !== undefined ? { baseUrl } : {}),
+    ...normalizeApiContext(context),
   });
   return response.data;
 }
@@ -49,22 +53,25 @@ export async function createTable(
 export async function updateTable(
   id: number,
   input: TableInput,
-  baseUrl?: string,
+  context?: ApiRequestContext,
 ): Promise<RestaurantTable> {
   const response = await apiFetch<ApiResource<RestaurantTable>>(
     `/tables/${id}`,
     {
       method: 'PUT',
       body: JSON.stringify(input),
-      ...(baseUrl !== undefined ? { baseUrl } : {}),
+      ...normalizeApiContext(context),
     },
   );
   return response.data;
 }
 
-export async function deleteTable(id: number, baseUrl?: string): Promise<void> {
+export async function deleteTable(
+  id: number,
+  context?: ApiRequestContext,
+): Promise<void> {
   await apiFetch<undefined>(`/tables/${id}`, {
     method: 'DELETE',
-    ...(baseUrl !== undefined ? { baseUrl } : {}),
+    ...normalizeApiContext(context),
   });
 }

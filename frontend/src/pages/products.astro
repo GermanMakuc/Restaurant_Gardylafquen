@@ -3,10 +3,16 @@ import ProductsManager from '../features/products/ProductsManager.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { listCategories } from '../lib/api/categories';
 import { listProducts } from '../lib/api/products';
+import { resolveServerSession } from '../lib/auth/session';
 import { es } from '../lib/i18n/es';
 import type { PaginatedResponse } from '../types/api';
 import type { Category } from '../types/category';
 import type { Product } from '../types/product';
+
+const session = await resolveServerSession(Astro.cookies);
+if (session === null) {
+  return Astro.redirect('/login');
+}
 
 const searchQuery = Astro.url.searchParams.get('q') ?? '';
 const rawCategory = Number(Astro.url.searchParams.get('category') ?? '');
@@ -20,17 +26,21 @@ let categories: Category[] = [];
 let loadFailed = false;
 
 try {
+  const ctx = { token: session.token };
   const [productsRes, categoriesRes] = await Promise.all([
-    listProducts({
-      name: searchQuery,
-      ...(selectedCategoryId !== null
-        ? { categoryId: selectedCategoryId }
-        : {}),
-      sort: '-created_at',
-      page: currentPage,
-      perPage: 15,
-    }),
-    listCategories({ sort: 'name', perPage: 100 }),
+    listProducts(
+      {
+        name: searchQuery,
+        ...(selectedCategoryId !== null
+          ? { categoryId: selectedCategoryId }
+          : {}),
+        sort: '-created_at',
+        page: currentPage,
+        perPage: 15,
+      },
+      ctx,
+    ),
+    listCategories({ sort: 'name', perPage: 100 }, ctx),
   ]);
 
   result = productsRes;
@@ -38,14 +48,17 @@ try {
 } catch {
   loadFailed = true;
 }
+
+const canManage = session.user.role === 'admin';
 ---
 
-<BaseLayout title={es.products.pageTitle}>
+<BaseLayout title={es.products.pageTitle} user={session.user}>
   <ProductsManager
     result={result}
     categories={categories}
     searchQuery={searchQuery}
     selectedCategoryId={selectedCategoryId}
     loadFailed={loadFailed}
+    canManage={canManage}
   />
 </BaseLayout>

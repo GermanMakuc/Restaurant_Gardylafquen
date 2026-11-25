@@ -7,9 +7,10 @@ interface Props {
   result: PaginatedResponse<RestaurantTable> | null;
   selectedStatus: string;
   loadFailed: boolean;
+  canManage?: boolean;
 }
 
-const { result, selectedStatus, loadFailed } = Astro.props;
+const { result, selectedStatus, loadFailed, canManage = true } = Astro.props;
 const tables = result?.data ?? [];
 const meta = result?.meta;
 const statuses: TableStatus[] = [
@@ -38,13 +39,15 @@ const buildPageHref = (page: number): string => {
       <p class="text-sm text-ink-muted sm:text-base">{es.tables.subtitle}</p>
     </div>
 
-    <button
-      id="open-create-table"
-      type="button"
-      class="inline-flex min-h-11 items-center rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-strong"
-    >
-      {es.tables.addButton}
-    </button>
+    {canManage && (
+      <button
+        id="open-create-table"
+        type="button"
+        class="inline-flex min-h-11 items-center rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-strong"
+      >
+        {es.tables.addButton}
+      </button>
+    )}
   </div>
 
   <search>
@@ -123,9 +126,11 @@ const buildPageHref = (page: number): string => {
               <th scope="col" class="px-4 py-3">
                 {es.tables.colStatus}
               </th>
-              <th scope="col" class="px-4 py-3 text-right">
-                {es.tables.colActions}
-              </th>
+              {canManage && (
+                <th scope="col" class="px-4 py-3 text-right">
+                  {es.tables.colActions}
+                </th>
+              )}
             </tr>
           </thead>
           <tbody class="divide-y divide-border/70">
@@ -165,33 +170,35 @@ const buildPageHref = (page: number): string => {
                     <span>{es.tables.statusLabels[table.status]}</span>
                   </span>
                 </td>
-                <td class="px-4 py-3 text-right">
-                  <div class="inline-flex items-center justify-end gap-2">
-                    <button
-                      type="button"
-                      data-action="edit-table"
-                      data-table-id={String(table.id)}
-                      data-table-number={String(table.number)}
-                      data-table-label={table.label ?? ''}
-                      data-table-capacity={String(table.capacity)}
-                      data-table-status={table.status}
-                      aria-label={`${es.tables.editButton} mesa #${table.number}`}
-                      class="inline-flex min-h-9 items-center rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-ink hover:bg-surface"
-                    >
-                      {es.tables.editButton}
-                    </button>
-                    <button
-                      type="button"
-                      data-action="delete-table"
-                      data-table-id={String(table.id)}
-                      data-table-number={String(table.number)}
-                      aria-label={`${es.tables.deleteButton} mesa #${table.number}`}
-                      class="inline-flex min-h-9 items-center rounded-md border border-danger/30 bg-danger-soft px-3 py-1.5 text-xs font-semibold text-danger hover:bg-danger hover:text-white"
-                    >
-                      {es.tables.deleteButton}
-                    </button>
-                  </div>
-                </td>
+                {canManage && (
+                  <td class="px-4 py-3 text-right">
+                    <div class="inline-flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        data-action="edit-table"
+                        data-table-id={String(table.id)}
+                        data-table-number={String(table.number)}
+                        data-table-label={table.label ?? ''}
+                        data-table-capacity={String(table.capacity)}
+                        data-table-status={table.status}
+                        aria-label={`${es.tables.editButton} mesa #${table.number}`}
+                        class="inline-flex min-h-9 items-center rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-ink hover:bg-surface"
+                      >
+                        {es.tables.editButton}
+                      </button>
+                      <button
+                        type="button"
+                        data-action="delete-table"
+                        data-table-id={String(table.id)}
+                        data-table-number={String(table.number)}
+                        aria-label={`${es.tables.deleteButton} mesa #${table.number}`}
+                        class="inline-flex min-h-9 items-center rounded-md border border-danger/30 bg-danger-soft px-3 py-1.5 text-xs font-semibold text-danger hover:bg-danger hover:text-white"
+                      >
+                        {es.tables.deleteButton}
+                      </button>
+                    </div>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

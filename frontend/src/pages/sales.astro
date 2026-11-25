@@ -2,9 +2,18 @@
 import SalesManager from '../features/sales/SalesManager.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getSalesSummary, listSales } from '../lib/api/sales';
+import { resolveServerSession } from '../lib/auth/session';
 import { es } from '../lib/i18n/es';
 import type { PaginatedResponse } from '../types/api';
 import type { Sale, SalesSummary } from '../types/sale';
+
+const session = await resolveServerSession(Astro.cookies);
+if (session === null) {
+  return Astro.redirect('/login');
+}
+
+const canViewSales =
+  session.user.role === 'admin' || session.user.role === 'cashier';
 
 const rawFrom = Astro.url.searchParams.get('from') ?? '';
 const rawTo = Astro.url.searchParams.get('to') ?? '';
@@ -18,35 +27,51 @@ let result: PaginatedResponse<Sale> | null = null;
 let summary: SalesSummary | null = null;
 let loadFailed = false;
 
-try {
-  const filter = {
-    ...(fromDate !== '' ? { from: fromDate } : {}),
-    ...(toDate !== '' ? { to: toDate } : {}),
-  };
+if (canViewSales) {
+  try {
+    const ctx = { token: session.token };
+    const filter = {
+      ...(fromDate !== '' ? { from: fromDate } : {}),
+      ...(toDate !== '' ? { to: toDate } : {}),
+    };
 
-  const [salesRes, summaryRes] = await Promise.all([
-    listSales({
-      ...filter,
-      sort: '-paid_at',
-      page: currentPage,
-      perPage: 15,
-    }),
-    getSalesSummary(filter),
-  ]);
+    const [salesRes, summaryRes] = await Promise.all([
+      listSales(
+        {
+          ...filter,
+          sort: '-paid_at',
+          page: currentPage,
+          perPage: 15,
+        },
+        ctx,
+      ),
+      getSalesSummary(filter, ctx),
+    ]);
 
-  result = salesRes;
-  summary = summaryRes;
-} catch {
-  loadFailed = true;
+    result = salesRes;
+    summary = summaryRes;
+  } catch {
+    loadFailed = true;
+  }
 }
 ---
 
-<BaseLayout title={es.sales.pageTitle}>
-  <SalesManager
-    result={result}
-    summary={summary}
-    fromDate={fromDate}
-    toDate={toDate}
-    loadFailed={loadFailed}
-  />
+<BaseLayout title={es.sales.pageTitle} user={session.user}>
+  {canViewSales ? (
+    <SalesManager
+      result={result}
+      summary={summary}
+      fromDate={fromDate}
+      toDate={toDate}
+      loadFailed={loadFailed}
+    />
+  ) : (
+    <section
+      role="alert"
+      class="space-y-2 rounded-xl border border-danger/30 bg-danger-soft p-6 text-danger"
+    >
+      <h1 class="text-xl font-bold">{es.auth.forbiddenTitle}</h1>
+      <p class="text-sm">{es.auth.forbiddenSales}</p>
+    </section>
+  )}
 </BaseLayout>

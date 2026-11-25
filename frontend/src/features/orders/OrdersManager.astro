@@ -14,10 +14,20 @@ interface Props {
   products: Product[];
   selectedStatus: string;
   loadFailed: boolean;
+  canEditOrders?: boolean;
+  canCheckout?: boolean;
 }
 
-const { result, tables, waiters, products, selectedStatus, loadFailed } =
-  Astro.props;
+const {
+  result,
+  tables,
+  waiters,
+  products,
+  selectedStatus,
+  loadFailed,
+  canEditOrders = true,
+  canCheckout = true,
+} = Astro.props;
 const orders = result?.data ?? [];
 const meta = result?.meta;
 const statuses: OrderStatus[] = ['waiting', 'served', 'paid', 'cancelled'];
@@ -41,13 +51,15 @@ const buildPageHref = (page: number): string => {
       <p class="text-sm text-ink-muted sm:text-base">{es.orders.subtitle}</p>
     </div>
 
-    <button
-      id="open-create-order"
-      type="button"
-      class="inline-flex min-h-11 items-center rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-strong"
-    >
-      {es.orders.addButton}
-    </button>
+    {canEditOrders && (
+      <button
+        id="open-create-order"
+        type="button"
+        class="inline-flex min-h-11 items-center rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-strong"
+      >
+        {es.orders.addButton}
+      </button>
+    )}
   </div>
 
   <search>
@@ -196,7 +208,7 @@ const buildPageHref = (page: number): string => {
                   </td>
                   <td class="px-4 py-3 text-right">
                     <div class="inline-flex flex-wrap items-center justify-end gap-1.5">
-                      {isActive && (
+                      {canEditOrders && isActive && (
                         <button
                           type="button"
                           data-action="edit-order"
@@ -212,7 +224,7 @@ const buildPageHref = (page: number): string => {
                         </button>
                       )}
 
-                      {order.status === 'waiting' && (
+                      {canEditOrders && order.status === 'waiting' && (
                         <button
                           type="button"
                           data-action="status-order"
@@ -225,7 +237,7 @@ const buildPageHref = (page: number): string => {
                         </button>
                       )}
 
-                      {order.status === 'served' && (
+                      {canEditOrders && order.status === 'served' && (
                         <button
                           type="button"
                           data-action="status-order"
@@ -238,7 +250,7 @@ const buildPageHref = (page: number): string => {
                         </button>
                       )}
 
-                      {isActive && (
+                      {canCheckout && isActive && (
                         <button
                           type="button"
                           data-action="checkout-order"
@@ -253,7 +265,7 @@ const buildPageHref = (page: number): string => {
                         </button>
                       )}
 
-                      {order.status !== 'paid' && (
+                      {canEditOrders && order.status !== 'paid' && (
                         <button
                           type="button"
                           data-action="delete-order"

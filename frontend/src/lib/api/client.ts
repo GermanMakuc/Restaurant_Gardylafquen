@@ -22,14 +22,38 @@ export interface ApiFetchOptions extends Omit<RequestInit, 'headers'> {
   baseUrl?: string;
 }
 
+export type ApiRequestContext =
+  | string
+  | {
+      token?: string;
+      baseUrl?: string;
+    };
+
+export function normalizeApiContext(context?: ApiRequestContext): {
+  token?: string;
+  baseUrl?: string;
+} {
+  if (context === undefined) {
+    return {};
+  }
+  if (typeof context === 'string') {
+    return { baseUrl: context };
+  }
+  return context;
+}
+
 export function resolveApiBaseUrl(): string {
+  if (typeof window !== 'undefined') {
+    return '/api/proxy';
+  }
+
   const internalUrl =
     typeof process !== 'undefined'
       ? process.env['API_INTERNAL_URL']
       : undefined;
   const publicUrl = import.meta.env.PUBLIC_API_URL as string | undefined;
 
-  if (typeof window === 'undefined' && internalUrl && internalUrl.length > 0) {
+  if (internalUrl && internalUrl.length > 0) {
     return internalUrl.replace(/\/+$/, '');
   }
 

@@ -9,6 +9,7 @@ use App\Http\Requests\Category\ListCategoriesRequest;
 use App\Http\Requests\Category\StoreCategoryRequest;
 use App\Http\Requests\Category\UpdateCategoryRequest;
 use App\Http\Resources\CategoryResource;
+use App\Models\Category;
 use App\Services\CategoryService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -24,6 +25,8 @@ final class CategoryController extends Controller
 
     public function index(ListCategoriesRequest $request): AnonymousResourceCollection
     {
+        $this->authorize('viewAny', Category::class);
+
         $categories = $this->service->list($request->toDto());
 
         return CategoryResource::collection($categories);
@@ -31,6 +34,8 @@ final class CategoryController extends Controller
 
     public function store(StoreCategoryRequest $request): JsonResponse
     {
+        $this->authorize('create', Category::class);
+
         $category = $this->service->create($request->toDto());
 
         $response = CategoryResource::make($category)->response();
@@ -42,11 +47,15 @@ final class CategoryController extends Controller
 
     public function show(string $category): CategoryResource
     {
+        $this->authorize('view', Category::class);
+
         return CategoryResource::make($this->service->findOrFail((int) $category));
     }
 
     public function update(UpdateCategoryRequest $request, string $category): CategoryResource
     {
+        $this->authorize('update', Category::class);
+
         $updated = $this->service->update((int) $category, $request->toDto());
 
         return CategoryResource::make($updated);
@@ -54,6 +63,8 @@ final class CategoryController extends Controller
 
     public function destroy(string $category): JsonResponse
     {
+        $this->authorize('delete', Category::class);
+
         $this->service->delete((int) $category);
 
         return new JsonResponse(null, 204);

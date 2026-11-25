@@ -12,6 +12,12 @@ final class CategoryApiTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->actingAsRole();
+    }
+
     public function test_index_returns_paginated_filtered_and_sorted_categories(): void
     {
         factory(Category::class)->create(['name' => 'Postres']);

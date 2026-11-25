@@ -8,11 +8,14 @@ info:
 servers:
   - url: http://localhost:8000/api/v1
     description: Entorno local (Docker)
+security:
+  - bearerAuth: []
 paths:
   /health:
     get:
       summary: Estado de la API y conexión a base de datos
       operationId: getHealth
+      security: []
       tags:
         - System
       responses:
@@ -36,6 +39,61 @@ paths:
                 properties:
                   data:
                     $ref: "#/components/schemas/HealthStatus"
+  /auth/login:
+    post:
+      summary: Iniciar sesión y obtener token Bearer
+      operationId: login
+      security: []
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Sesión iniciada correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/AuthToken"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /auth/me:
+    get:
+      summary: Obtener usuario autenticado actual
+      operationId: getCurrentUser
+      tags: [Auth]
+      responses:
+        "200":
+          description: Perfil del usuario autenticado
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/User"
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
+  /auth/logout:
+    post:
+      summary: Cerrar sesión y revocar token Bearer actual
+      operationId: logout
+      tags: [Auth]
+      responses:
+        "204":
+          description: Sesión cerrada
+        "401":
+          $ref: "#/components/responses/Unauthenticated"
   /categories:
     get:
       summary: Listar categorías paginadas
@@ -918,7 +976,24 @@ paths:
         "404":
           $ref: "#/components/responses/NotFound"
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Token emitido por /auth/login (almacenado con hash SHA-256)
   responses:
+    Unauthenticated:
+      description: No autenticado o credenciales inválidas
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Forbidden:
+      description: Sin permisos suficientes para esta operación
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
     ValidationError:
       description: Error de validación
       content:
@@ -1188,6 +1263,29 @@ components:
           $ref: "#/components/schemas/PaginationLinks"
         meta:
           $ref: "#/components/schemas/PaginationMeta"
+    User:
+      type: object
+      required: [id, name, email, role, created_at]
+      properties:
+        id: { type: integer, example: 1 }
+        name: { type: string, example: Administración }
+        email: { type: string, format: email, example: admin@gardylafquen.test }
+        role: { type: string, enum: [admin, cashier, waiter] }
+        created_at: { type: string, format: date-time, nullable: true }
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, format: password, minLength: 1 }
+    AuthToken:
+      type: object
+      required: [token, token_type, user]
+      properties:
+        token: { type: string }
+        token_type: { type: string, example: Bearer }
+        user:
+          $ref: "#/components/schemas/User"
     ErrorResponse:
       type: object
       required: [message, code]

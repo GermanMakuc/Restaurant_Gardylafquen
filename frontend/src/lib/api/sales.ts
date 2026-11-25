@@ -5,7 +5,11 @@ import type {
   SaleListQuery,
   SalesSummary,
 } from '../../types/sale';
-import { apiFetch } from './client';
+import {
+  apiFetch,
+  normalizeApiContext,
+  type ApiRequestContext,
+} from './client';
 
 function buildSalesQuery(
   query: SaleListQuery,
@@ -37,39 +41,36 @@ function buildSalesQuery(
 
 export async function listSales(
   query: SaleListQuery = {},
-  baseUrl?: string,
+  context?: ApiRequestContext,
 ): Promise<PaginatedResponse<Sale>> {
   const qs = buildSalesQuery(query, true);
   const path = qs.length > 0 ? `/sales?${qs}` : '/sales';
 
-  return apiFetch<PaginatedResponse<Sale>>(
-    path,
-    baseUrl !== undefined ? { baseUrl } : {},
-  );
+  return apiFetch<PaginatedResponse<Sale>>(path, normalizeApiContext(context));
 }
 
 export async function getSalesSummary(
   query: Pick<SaleListQuery, 'from' | 'to'> = {},
-  baseUrl?: string,
+  context?: ApiRequestContext,
 ): Promise<SalesSummary> {
   const qs = buildSalesQuery(query, false);
   const path = qs.length > 0 ? `/sales/summary?${qs}` : '/sales/summary';
 
   const response = await apiFetch<ApiResource<SalesSummary>>(
     path,
-    baseUrl !== undefined ? { baseUrl } : {},
+    normalizeApiContext(context),
   );
   return response.data;
 }
 
 export async function createSale(
   input: SaleInput,
-  baseUrl?: string,
+  context?: ApiRequestContext,
 ): Promise<Sale> {
   const response = await apiFetch<ApiResource<Sale>>('/sales', {
     method: 'POST',
     body: JSON.stringify(input),
-    ...(baseUrl !== undefined ? { baseUrl } : {}),
+    ...normalizeApiContext(context),
   });
   return response.data;
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\HealthController;
 use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\ProductController;
+use App\Http\Controllers\Api\V1\SaleController;
 use App\Http\Controllers\Api\V1\TableController;
 use App\Http\Controllers\Api\V1\WaiterController;
 use Illuminate\Http\Request;
@@ -32,6 +33,9 @@ Route::prefix('v1')->group(function (): void {
     Route::apiResource('tables', TableController::class);
     Route::apiResource('orders', OrderController::class);
     Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus']);
+
+    Route::get('/sales/summary', [SaleController::class, 'summary']);
+    Route::apiResource('sales', SaleController::class)->only(['index', 'store', 'show']);
 
     Route::middleware('auth:api')->get('/user', function (Request $request) {
         return $request->user();

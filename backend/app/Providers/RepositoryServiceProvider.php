@@ -7,11 +7,13 @@ namespace App\Providers;
 use App\Repositories\Contracts\CategoryRepositoryInterface;
 use App\Repositories\Contracts\OrderRepositoryInterface;
 use App\Repositories\Contracts\ProductRepositoryInterface;
+use App\Repositories\Contracts\SaleRepositoryInterface;
 use App\Repositories\Contracts\TableRepositoryInterface;
 use App\Repositories\Contracts\WaiterRepositoryInterface;
 use App\Repositories\Eloquent\EloquentCategoryRepository;
 use App\Repositories\Eloquent\EloquentOrderRepository;
 use App\Repositories\Eloquent\EloquentProductRepository;
+use App\Repositories\Eloquent\EloquentSaleRepository;
 use App\Repositories\Eloquent\EloquentTableRepository;
 use App\Repositories\Eloquent\EloquentWaiterRepository;
 use App\Services\ProductService;
@@ -26,6 +28,7 @@ final class RepositoryServiceProvider extends ServiceProvider
         $this->app->bind(WaiterRepositoryInterface::class, EloquentWaiterRepository::class);
         $this->app->bind(TableRepositoryInterface::class, EloquentTableRepository::class);
         $this->app->bind(OrderRepositoryInterface::class, EloquentOrderRepository::class);
+        $this->app->bind(SaleRepositoryInterface::class, EloquentSaleRepository::class);
 
         $this->app->when(ProductService::class)
             ->needs('$imageDisk')

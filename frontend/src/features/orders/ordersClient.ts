@@ -4,6 +4,7 @@ import {
   updateOrder,
   updateOrderStatus,
 } from '../../lib/api/orders';
+import { createSale } from '../../lib/api/sales';
 import { ApiError } from '../../lib/api/client';
 import { formatPriceFromCents } from '../../lib/format/currency';
 import { es } from '../../lib/i18n/es';
@@ -66,6 +67,20 @@ export function initOrdersManager(): void {
   }
 
   installLightDismissFallback([formDialog, deleteDialog]);
+
+  const checkoutDialog = document.getElementById('order-checkout-dialog');
+  const checkoutForm = document.getElementById('order-checkout-form');
+  const checkoutTipInput = document.getElementById('checkout-tip-percent');
+  const checkoutSubtotalEl = document.getElementById('checkout-subtotal');
+  const checkoutTipAmountEl = document.getElementById('checkout-tip-amount');
+  const checkoutTotalEl = document.getElementById('checkout-total');
+  const checkoutErrorEl = document.getElementById('order-checkout-error');
+  const checkoutSubmitBtn = document.getElementById(
+    'order-checkout-submit-btn',
+  );
+  if (checkoutDialog instanceof HTMLDialogElement) {
+    installLightDismissFallback([checkoutDialog]);
+  }
 
   const formTitle = document.getElementById('order-form-title');
   const orderForm = document.getElementById('order-form');
@@ -477,4 +492,99 @@ export function initOrdersManager(): void {
       confirmDeleteButton.textContent = es.orders.confirmDeleteButton;
     }
   });
+
+  if (
+    checkoutDialog instanceof HTMLDialogElement &&
+    checkoutForm instanceof HTMLFormElement &&
+    checkoutTipInput instanceof HTMLInputElement &&
+    checkoutSubtotalEl instanceof HTMLElement &&
+    checkoutTipAmountEl instanceof HTMLElement &&
+    checkoutTotalEl instanceof HTMLElement &&
+    checkoutErrorEl instanceof HTMLElement &&
+    checkoutSubmitBtn instanceof HTMLButtonElement
+  ) {
+    let checkoutOrderId: number | null = null;
+    let checkoutSubtotalCents = 0;
+
+    const refreshCheckoutSummary = (): void => {
+      const rawTip = Number(checkoutTipInput.value.trim());
+      const tipPercent =
+        Number.isInteger(rawTip) && rawTip >= 0 && rawTip <= 100 ? rawTip : 0;
+      const tipCents = Math.round((checkoutSubtotalCents * tipPercent) / 100);
+      checkoutSubtotalEl.textContent = formatPriceFromCents(
+        checkoutSubtotalCents,
+      );
+      checkoutTipAmountEl.textContent = formatPriceFromCents(tipCents);
+      checkoutTotalEl.textContent = formatPriceFromCents(
+        checkoutSubtotalCents + tipCents,
+      );
+    };
+
+    document
+      .querySelectorAll<HTMLButtonElement>('[data-action="checkout-order"]')
+      .forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const id = Number(btn.dataset['orderId']);
+          const subtotal = Number(btn.dataset['orderSubtotalCents']);
+          if (!Number.isNaN(id) && id > 0 && !Number.isNaN(subtotal)) {
+            checkoutOrderId = id;
+            checkoutSubtotalCents = subtotal;
+            checkoutTipInput.value = '10';
+            checkoutTipInput.removeAttribute('aria-invalid');
+            checkoutErrorEl.textContent = '';
+            checkoutErrorEl.hidden = true;
+            checkoutSubmitBtn.disabled = false;
+            checkoutSubmitBtn.textContent = es.orders.checkoutConfirmButton;
+            refreshCheckoutSummary();
+            checkoutDialog.showModal();
+            checkoutTipInput.focus();
+          }
+        });
+      });
+
+    checkoutTipInput.addEventListener('input', () => {
+      checkoutTipInput.removeAttribute('aria-invalid');
+      checkoutErrorEl.textContent = '';
+      checkoutErrorEl.hidden = true;
+      refreshCheckoutSummary();
+    });
+
+    checkoutDialog.addEventListener('close', () => {
+      checkoutDialog.returnValue = '';
+    });
+
+    checkoutForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (checkoutOrderId === null) {
+        return;
+      }
+
+      const tipPercent = Number(checkoutTipInput.value.trim());
+      if (!Number.isInteger(tipPercent) || tipPercent < 0 || tipPercent > 100) {
+        checkoutErrorEl.textContent = es.orders.validationTip;
+        checkoutErrorEl.hidden = false;
+        checkoutTipInput.setAttribute('aria-invalid', 'true');
+        checkoutTipInput.focus();
+        return;
+      }
+
+      checkoutSubmitBtn.disabled = true;
+      checkoutSubmitBtn.textContent = es.orders.checkoutSavingButton;
+
+      try {
+        await createSale({
+          order_id: checkoutOrderId,
+          tip_percent: tipPercent,
+        });
+        checkoutDialog.close();
+        window.location.href = '/sales';
+      } catch (error) {
+        checkoutErrorEl.textContent =
+          error instanceof ApiError ? error.message : es.orders.unexpectedError;
+        checkoutErrorEl.hidden = false;
+        checkoutSubmitBtn.disabled = false;
+        checkoutSubmitBtn.textContent = es.orders.checkoutConfirmButton;
+      }
+    });
+  }
 }

@@ -808,6 +808,115 @@ paths:
           $ref: "#/components/responses/DomainConflict"
         "422":
           $ref: "#/components/responses/ValidationError"
+  /sales:
+    get:
+      summary: Listar ventas paginadas por rango de fechas
+      operationId: listSales
+      tags: [Sales]
+      parameters:
+        - name: filter[from]
+          in: query
+          schema: { type: string, format: date }
+        - name: filter[to]
+          in: query
+          schema: { type: string, format: date }
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [id, -id, paid_at, -paid_at, total_cents, -total_cents]
+            default: -paid_at
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: per_page
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 15 }
+      responses:
+        "200":
+          description: Listado paginado de ventas
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedSales"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    post:
+      summary: Cerrar una orden y registrar la venta (ticket)
+      operationId: createSale
+      tags: [Sales]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SaleInput"
+      responses:
+        "201":
+          description: Venta registrada
+          headers:
+            Location:
+              schema: { type: string, format: uri }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Sale"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/DomainConflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /sales/summary:
+    get:
+      summary: Obtener totales acumulados de ventas en el rango
+      operationId: getSalesSummary
+      tags: [Sales]
+      parameters:
+        - name: filter[from]
+          in: query
+          schema: { type: string, format: date }
+        - name: filter[to]
+          in: query
+          schema: { type: string, format: date }
+      responses:
+        "200":
+          description: Resumen de ventas
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/SalesSummary"
+  /sales/{sale}:
+    parameters:
+      - name: sale
+        in: path
+        required: true
+        schema: { type: integer, minimum: 1 }
+    get:
+      summary: Obtener detalle / ticket de una venta
+      operationId: getSale
+      tags: [Sales]
+      responses:
+        "200":
+          description: Detalle de la venta
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Sale"
+        "404":
+          $ref: "#/components/responses/NotFound"
 components:
   responses:
     ValidationError:
@@ -1035,6 +1144,46 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Order"
+        links:
+          $ref: "#/components/schemas/PaginationLinks"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+    Sale:
+      type: object
+      required: [id, order_id, tip_percent, subtotal_cents, tip_cents, total_cents, paid_at, created_at]
+      properties:
+        id: { type: integer }
+        order_id: { type: integer }
+        order:
+          $ref: "#/components/schemas/Order"
+        tip_percent: { type: integer, minimum: 0, maximum: 100 }
+        subtotal_cents: { type: integer, minimum: 0 }
+        tip_cents: { type: integer, minimum: 0 }
+        total_cents: { type: integer, minimum: 0 }
+        paid_at: { type: string, format: date-time }
+        created_at: { type: string, format: date-time, nullable: true }
+    SaleInput:
+      type: object
+      required: [order_id]
+      properties:
+        order_id: { type: integer, minimum: 1 }
+        tip_percent: { type: integer, minimum: 0, maximum: 100, default: 10 }
+    SalesSummary:
+      type: object
+      required: [count, subtotal_cents, tip_cents, total_cents]
+      properties:
+        count: { type: integer, minimum: 0 }
+        subtotal_cents: { type: integer, minimum: 0 }
+        tip_cents: { type: integer, minimum: 0 }
+        total_cents: { type: integer, minimum: 0 }
+    PaginatedSales:
+      type: object
+      required: [data, links, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Sale"
         links:
           $ref: "#/components/schemas/PaginationLinks"
         meta:

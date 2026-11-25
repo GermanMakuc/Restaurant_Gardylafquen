@@ -1,0 +1,52 @@
+---
+import SalesManager from '../features/sales/SalesManager.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getSalesSummary, listSales } from '../lib/api/sales';
+import { es } from '../lib/i18n/es';
+import type { PaginatedResponse } from '../types/api';
+import type { Sale, SalesSummary } from '../types/sale';
+
+const rawFrom = Astro.url.searchParams.get('from') ?? '';
+const rawTo = Astro.url.searchParams.get('to') ?? '';
+const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+const fromDate = dateRegex.test(rawFrom) ? rawFrom : '';
+const toDate = dateRegex.test(rawTo) ? rawTo : '';
+const rawPage = Number(Astro.url.searchParams.get('page') ?? '1');
+const currentPage = Number.isInteger(rawPage) && rawPage > 0 ? rawPage : 1;
+
+let result: PaginatedResponse<Sale> | null = null;
+let summary: SalesSummary | null = null;
+let loadFailed = false;
+
+try {
+  const filter = {
+    ...(fromDate !== '' ? { from: fromDate } : {}),
+    ...(toDate !== '' ? { to: toDate } : {}),
+  };
+
+  const [salesRes, summaryRes] = await Promise.all([
+    listSales({
+      ...filter,
+      sort: '-paid_at',
+      page: currentPage,
+      perPage: 15,
+    }),
+    getSalesSummary(filter),
+  ]);
+
+  result = salesRes;
+  summary = summaryRes;
+} catch {
+  loadFailed = true;
+}
+---
+
+<BaseLayout title={es.sales.pageTitle}>
+  <SalesManager
+    result={result}
+    summary={summary}
+    fromDate={fromDate}
+    toDate={toDate}
+    loadFailed={loadFailed}
+  />
+</BaseLayout>

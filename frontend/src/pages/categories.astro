@@ -1,0 +1,34 @@
+---
+import CategoriesManager from '../features/categories/CategoriesManager.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { listCategories } from '../lib/api/categories';
+import { es } from '../lib/i18n/es';
+import type { PaginatedResponse } from '../types/api';
+import type { Category } from '../types/category';
+
+const searchQuery = Astro.url.searchParams.get('q') ?? '';
+const rawPage = Number(Astro.url.searchParams.get('page') ?? '1');
+const currentPage = Number.isInteger(rawPage) && rawPage > 0 ? rawPage : 1;
+
+let result: PaginatedResponse<Category> | null = null;
+let loadFailed = false;
+
+try {
+  result = await listCategories({
+    name: searchQuery,
+    sort: '-created_at',
+    page: currentPage,
+    perPage: 15,
+  });
+} catch {
+  loadFailed = true;
+}
+---
+
+<BaseLayout title={es.categories.pageTitle}>
+  <CategoriesManager
+    result={result}
+    searchQuery={searchQuery}
+    loadFailed={loadFailed}
+  />
+</BaseLayout>

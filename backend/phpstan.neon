@@ -14,5 +14,4 @@ parameters:
     - app/Repositories
     - app/Services
     - routes/api.php
-    - tests/Unit/HealthServiceTest.php
-    - tests/Feature/HealthEndpointTest.php
+    - tests

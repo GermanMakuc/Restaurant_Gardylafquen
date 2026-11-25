@@ -30,6 +30,16 @@
     outline: 3px solid var(--color-brand);
     outline-offset: 2px;
   }
+
+  dialog:modal {
+    overscroll-behavior: contain;
+  }
+
+  dialog::backdrop {
+    background-color: rgb(15 23 42 / 0.5);
+    overflow: hidden;
+    overscroll-behavior: contain;
+  }
 }
 
 .skip-link {

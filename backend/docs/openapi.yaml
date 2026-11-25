@@ -38,7 +38,191 @@ paths:
                 properties:
                   data:
                     $ref: "#/components/schemas/HealthStatus"
+  /categories:
+    get:
+      summary: Listar categorías paginadas
+      operationId: listCategories
+      tags:
+        - Categories
+      parameters:
+        - name: filter[name]
+          in: query
+          description: Filtrar por coincidencia parcial del nombre
+          schema:
+            type: string
+            maxLength: 100
+        - name: sort
+          in: query
+          description: Ordenamiento permitido
+          schema:
+            type: string
+            enum: [id, -id, name, -name, created_at, -created_at]
+            default: -created_at
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 15
+      responses:
+        "200":
+          description: Listado paginado de categorías
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedCategories"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    post:
+      summary: Crear una nueva categoría
+      operationId: createCategory
+      tags:
+        - Categories
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryInput"
+      responses:
+        "201":
+          description: Categoría creada
+          headers:
+            Location:
+              schema:
+                type: string
+                format: uri
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Category"
+        "409":
+          $ref: "#/components/responses/DomainConflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /categories/{category}:
+    parameters:
+      - name: category
+        in: path
+        required: true
+        schema:
+          type: integer
+          minimum: 1
+    get:
+      summary: Obtener una categoría por ID
+      operationId: getCategory
+      tags:
+        - Categories
+      responses:
+        "200":
+          description: Detalle de la categoría
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Category"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      summary: Actualizar una categoría
+      operationId: replaceCategory
+      tags:
+        - Categories
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryInput"
+      responses:
+        "200":
+          description: Categoría actualizada
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Category"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/DomainConflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    patch:
+      summary: Actualizar parcialmente una categoría
+      operationId: updateCategory
+      tags:
+        - Categories
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CategoryInput"
+      responses:
+        "200":
+          description: Categoría actualizada
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Category"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/DomainConflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    delete:
+      summary: Eliminar una categoría
+      operationId: deleteCategory
+      tags:
+        - Categories
+      responses:
+        "204":
+          description: Categoría eliminada
+        "404":
+          $ref: "#/components/responses/NotFound"
 components:
+  responses:
+    ValidationError:
+      description: Error de validación
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    DomainConflict:
+      description: Conflicto de regla de dominio
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
   schemas:
     HealthStatus:
       type: object
@@ -61,6 +245,87 @@ components:
           type: string
           format: date-time
           example: "2026-11-24T21:00:00Z"
+    Category:
+      type: object
+      required:
+        - id
+        - name
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Bebidas
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-11-24T21:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+          example: "2026-11-24T21:00:00Z"
+    CategoryInput:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          example: Bebidas
+    PaginationLinks:
+      type: object
+      properties:
+        first:
+          type: string
+          nullable: true
+        last:
+          type: string
+          nullable: true
+        prev:
+          type: string
+          nullable: true
+        next:
+          type: string
+          nullable: true
+    PaginationMeta:
+      type: object
+      required: [current_page, last_page, per_page, total]
+      properties:
+        current_page:
+          type: integer
+        from:
+          type: integer
+          nullable: true
+        last_page:
+          type: integer
+        path:
+          type: string
+        per_page:
+          type: integer
+        to:
+          type: integer
+          nullable: true
+        total:
+          type: integer
+    PaginatedCategories:
+      type: object
+      required: [data, links, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Category"
+        links:
+          $ref: "#/components/schemas/PaginationLinks"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
     ErrorResponse:
       type: object
       required:

@@ -33,17 +33,40 @@ try {
       </h2>
 
       <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {es.home.modules.map((mod) => (
-          <li class="flex flex-col justify-between rounded-xl border border-border bg-surface-card p-5 shadow-xs">
-            <div>
-              <h3 class="text-base font-semibold text-ink">{mod.name}</h3>
-              <p class="mt-1 text-sm text-ink-muted">{mod.description}</p>
-            </div>
-            <p class="mt-4 inline-flex w-fit rounded-md bg-surface px-2.5 py-1 text-xs font-medium text-ink-muted">
-              {es.home.pendingBadge}
-            </p>
-          </li>
-        ))}
+        {es.home.modules.map((mod) => {
+          const href = 'href' in mod ? mod.href : undefined;
+          return (
+            <li class="flex flex-col justify-between rounded-xl border border-border bg-surface-card p-5 shadow-xs">
+              <div>
+                <h3 class="text-base font-semibold text-ink">
+                  {href !== undefined ? (
+                    <a
+                      href={href}
+                      class="text-brand-strong underline decoration-brand-strong/40 underline-offset-4 hover:decoration-brand-strong"
+                    >
+                      {mod.name}
+                    </a>
+                  ) : (
+                    mod.name
+                  )}
+                </h3>
+                <p class="mt-1 text-sm text-ink-muted">{mod.description}</p>
+              </div>
+              <p
+                class:list={[
+                  'mt-4 inline-flex w-fit rounded-md px-2.5 py-1 text-xs font-medium',
+                  href !== undefined
+                    ? 'bg-brand-soft text-brand-strong'
+                    : 'bg-surface text-ink-muted',
+                ]}
+              >
+                {href !== undefined
+                  ? es.home.activeBadge
+                  : es.home.pendingBadge}
+              </p>
+            </li>
+          );
+        })}
       </ul>
     </section>
   </section>

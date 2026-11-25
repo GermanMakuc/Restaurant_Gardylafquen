@@ -26,7 +26,7 @@ Comandos útiles:
 ```bash
 docker compose exec backend php artisan db:seed
 docker compose exec backend ./vendor/bin/php-cs-fixer fix --dry-run --diff
-docker compose exec backend ./vendor/bin/phpstan analyse
+docker compose exec backend ./vendor/bin/phpstan analyse --memory-limit=512M
 docker compose exec backend ./vendor/bin/phpunit
 docker compose down            # detener (conserva la base de datos)
 docker compose down -v         # detener y borrar la base de datos

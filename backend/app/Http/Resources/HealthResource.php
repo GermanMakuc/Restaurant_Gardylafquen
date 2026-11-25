@@ -6,12 +6,11 @@ namespace App\Http\Resources;
 
 use App\DTOs\HealthStatusDto;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * @property-read HealthStatusDto $resource
  */
-final class HealthResource extends JsonResource
+final class HealthResource extends BaseJsonResource
 {
     /**
      * @param  Request  $request

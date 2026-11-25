@@ -980,7 +980,7 @@ components:
     bearerAuth:
       type: http
       scheme: bearer
-      description: Token emitido por /auth/login (almacenado con hash SHA-256)
+      description: Token Bearer emitido por Laravel Sanctum vía /auth/login
   responses:
     Unauthenticated:
       description: No autenticado o credenciales inválidas

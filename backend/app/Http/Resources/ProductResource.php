@@ -6,12 +6,13 @@ namespace App\Http\Resources;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Storage;
 
 /**
  * @property-read Product $resource
  */
-final class ProductResource extends BaseJsonResource
+final class ProductResource extends JsonResource
 {
     /**
      * @param  Request  $request

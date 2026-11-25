@@ -6,11 +6,12 @@ namespace App\Http\Resources;
 
 use App\Models\Table;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * @property-read Table $resource
  */
-final class TableResource extends BaseJsonResource
+final class TableResource extends JsonResource
 {
     /**
      * @param  Request  $request

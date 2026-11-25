@@ -6,11 +6,12 @@ namespace App\Http\Resources;
 
 use App\Models\Waiter;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * @property-read Waiter $resource
  */
-final class WaiterResource extends BaseJsonResource
+final class WaiterResource extends JsonResource
 {
     /**
      * @param  Request  $request

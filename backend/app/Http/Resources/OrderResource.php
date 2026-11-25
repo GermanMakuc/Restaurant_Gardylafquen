@@ -6,11 +6,12 @@ namespace App\Http\Resources;
 
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * @property-read Order $resource
  */
-final class OrderResource extends BaseJsonResource
+final class OrderResource extends JsonResource
 {
     /**
      * @param  Request  $request

@@ -70,6 +70,10 @@ export const ALL: APIRoute = async ({ params, request, url, cookies }) => {
     if (responseType !== null) {
       responseHeaders.set('content-type', responseType);
     }
+    const location = backendResponse.headers.get('location');
+    if (location !== null) {
+      responseHeaders.set('location', location);
+    }
 
     const responseBuffer = await backendResponse.arrayBuffer();
     return new Response(responseBuffer, {

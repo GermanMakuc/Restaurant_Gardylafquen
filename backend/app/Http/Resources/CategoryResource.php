@@ -6,11 +6,12 @@ namespace App\Http\Resources;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * @property-read Category $resource
  */
-final class CategoryResource extends BaseJsonResource
+final class CategoryResource extends JsonResource
 {
     /**
      * @param  Request  $request

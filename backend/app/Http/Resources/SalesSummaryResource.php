@@ -6,11 +6,12 @@ namespace App\Http\Resources;
 
 use App\DTOs\Sale\SalesSummaryDto;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * @property-read SalesSummaryDto $resource
  */
-final class SalesSummaryResource extends BaseJsonResource
+final class SalesSummaryResource extends JsonResource
 {
     /**
      * @param  Request  $request

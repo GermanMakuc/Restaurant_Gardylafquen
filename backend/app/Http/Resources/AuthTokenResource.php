@@ -6,11 +6,12 @@ namespace App\Http\Resources;
 
 use App\DTOs\Auth\AuthTokenDto;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * @property-read AuthTokenDto $resource
  */
-final class AuthTokenResource extends BaseJsonResource
+final class AuthTokenResource extends JsonResource
 {
     /**
      * @param  Request  $request

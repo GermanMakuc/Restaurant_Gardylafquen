@@ -6,11 +6,12 @@ namespace App\Http\Resources;
 
 use App\Models\Sale;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * @property-read Sale $resource
  */
-final class SaleResource extends BaseJsonResource
+final class SaleResource extends JsonResource
 {
     /**
      * @param  Request  $request

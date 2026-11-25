@@ -5,8 +5,7 @@ Aplicación para la gestión de productos, categorías, órdenes/mesas, meseros 
 ## Arquitectura (monorepo)
 
 - `backend/`: API REST en Laravel (`/api/v1/...`), arquitectura por capas (`Controller → FormRequest → DTO → Service → Repository → Model`), documentada en `backend/docs/openapi.yaml`.
-- `frontend/`: Astro + TypeScript estricto + Tailwind CSS.
-- La raíz conserva el código legado Laravel 5.7 con vistas Blade mientras se completan las fases de migración definidas en [AGENTS.md](AGENTS.md).
+- `frontend/`: Astro + TypeScript estricto + Tailwind CSS, sesión mediante cookies `httpOnly`.
 
 ## Docker
 

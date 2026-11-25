@@ -357,6 +357,299 @@ paths:
           $ref: "#/components/responses/NotFound"
         "422":
           $ref: "#/components/responses/ValidationError"
+  /waiters:
+    get:
+      summary: Listar meseros paginados
+      operationId: listWaiters
+      tags: [Waiters]
+      parameters:
+        - name: filter[name]
+          in: query
+          schema: { type: string, maxLength: 150 }
+        - name: filter[is_active]
+          in: query
+          schema: { type: boolean }
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [id, -id, name, -name, created_at, -created_at]
+            default: -created_at
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: per_page
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 15 }
+      responses:
+        "200":
+          description: Listado paginado de meseros
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedWaiters"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    post:
+      summary: Crear un mesero
+      operationId: createWaiter
+      tags: [Waiters]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WaiterInput"
+      responses:
+        "201":
+          description: Mesero creado
+          headers:
+            Location:
+              schema: { type: string, format: uri }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Waiter"
+        "409":
+          $ref: "#/components/responses/DomainConflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /waiters/{waiter}:
+    parameters:
+      - name: waiter
+        in: path
+        required: true
+        schema: { type: integer, minimum: 1 }
+    get:
+      summary: Obtener un mesero por ID
+      operationId: getWaiter
+      tags: [Waiters]
+      responses:
+        "200":
+          description: Detalle del mesero
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Waiter"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      summary: Actualizar un mesero
+      operationId: replaceWaiter
+      tags: [Waiters]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WaiterInput"
+      responses:
+        "200":
+          description: Mesero actualizado
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Waiter"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/DomainConflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    patch:
+      summary: Actualizar parcialmente un mesero
+      operationId: updateWaiter
+      tags: [Waiters]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WaiterInput"
+      responses:
+        "200":
+          description: Mesero actualizado
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Waiter"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/DomainConflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    delete:
+      summary: Eliminar (soft-delete) un mesero
+      operationId: deleteWaiter
+      tags: [Waiters]
+      responses:
+        "204":
+          description: Mesero eliminado
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /tables:
+    get:
+      summary: Listar mesas paginadas
+      operationId: listTables
+      tags: [Tables]
+      parameters:
+        - name: filter[status]
+          in: query
+          schema:
+            type: string
+            enum: [available, occupied, reserved, inactive]
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [id, -id, number, -number, capacity, -capacity, created_at, -created_at]
+            default: number
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: per_page
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+      responses:
+        "200":
+          description: Listado paginado de mesas
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedTables"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    post:
+      summary: Crear una mesa
+      operationId: createTable
+      tags: [Tables]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TableInput"
+      responses:
+        "201":
+          description: Mesa creada
+          headers:
+            Location:
+              schema: { type: string, format: uri }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Table"
+        "409":
+          $ref: "#/components/responses/DomainConflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /tables/{table}:
+    parameters:
+      - name: table
+        in: path
+        required: true
+        schema: { type: integer, minimum: 1 }
+    get:
+      summary: Obtener una mesa por ID
+      operationId: getTable
+      tags: [Tables]
+      responses:
+        "200":
+          description: Detalle de la mesa
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Table"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      summary: Actualizar una mesa
+      operationId: replaceTable
+      tags: [Tables]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TableInput"
+      responses:
+        "200":
+          description: Mesa actualizada
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Table"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/DomainConflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    patch:
+      summary: Actualizar parcialmente una mesa
+      operationId: updateTable
+      tags: [Tables]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TableInput"
+      responses:
+        "200":
+          description: Mesa actualizada
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Table"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/DomainConflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    delete:
+      summary: Eliminar (soft-delete) una mesa
+      operationId: deleteTable
+      tags: [Tables]
+      responses:
+        "204":
+          description: Mesa eliminada
+        "404":
+          $ref: "#/components/responses/NotFound"
 components:
   responses:
     ValidationError:
@@ -459,6 +752,66 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Product"
+        links:
+          $ref: "#/components/schemas/PaginationLinks"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+    Waiter:
+      type: object
+      required: [id, name, email, is_active, created_at, updated_at]
+      properties:
+        id: { type: integer, example: 1 }
+        name: { type: string, example: Camila Rojas }
+        email: { type: string, format: email, example: camila.rojas@example.test }
+        is_active: { type: boolean, example: true }
+        created_at: { type: string, format: date-time, nullable: true }
+        updated_at: { type: string, format: date-time, nullable: true }
+    WaiterInput:
+      type: object
+      required: [name, email]
+      properties:
+        name: { type: string, minLength: 2, maxLength: 150 }
+        email: { type: string, format: email, maxLength: 255 }
+        is_active: { type: boolean, default: true }
+    PaginatedWaiters:
+      type: object
+      required: [data, links, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Waiter"
+        links:
+          $ref: "#/components/schemas/PaginationLinks"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+    Table:
+      type: object
+      required: [id, number, label, capacity, status, created_at, updated_at]
+      properties:
+        id: { type: integer, example: 1 }
+        number: { type: integer, minimum: 1, example: 1 }
+        label: { type: string, nullable: true, example: Salón }
+        capacity: { type: integer, minimum: 1, example: 4 }
+        status: { type: string, enum: [available, occupied, reserved, inactive] }
+        created_at: { type: string, format: date-time, nullable: true }
+        updated_at: { type: string, format: date-time, nullable: true }
+    TableInput:
+      type: object
+      required: [number]
+      properties:
+        number: { type: integer, minimum: 1, maximum: 9999 }
+        capacity: { type: integer, minimum: 1, maximum: 50, default: 4 }
+        status: { type: string, enum: [available, occupied, reserved, inactive], default: available }
+        label: { type: string, nullable: true, maxLength: 100 }
+    PaginatedTables:
+      type: object
+      required: [data, links, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Table"
         links:
           $ref: "#/components/schemas/PaginationLinks"
         meta:

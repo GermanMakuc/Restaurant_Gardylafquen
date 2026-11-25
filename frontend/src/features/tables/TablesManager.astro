@@ -1,0 +1,397 @@
+---
+import { es } from '../../lib/i18n/es';
+import type { PaginatedResponse } from '../../types/api';
+import type { RestaurantTable, TableStatus } from '../../types/table';
+
+interface Props {
+  result: PaginatedResponse<RestaurantTable> | null;
+  selectedStatus: string;
+  loadFailed: boolean;
+}
+
+const { result, selectedStatus, loadFailed } = Astro.props;
+const tables = result?.data ?? [];
+const meta = result?.meta;
+const statuses: TableStatus[] = [
+  'available',
+  'occupied',
+  'reserved',
+  'inactive',
+];
+
+const buildPageHref = (page: number): string => {
+  const params = new URLSearchParams();
+  if (selectedStatus !== '') {
+    params.set('status', selectedStatus);
+  }
+  params.set('page', String(page));
+  return `/tables?${params.toString()}`;
+};
+---
+
+<section class="space-y-6">
+  <div class="flex flex-wrap items-start justify-between gap-4">
+    <div class="space-y-1">
+      <h1 class="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
+        {es.tables.heading}
+      </h1>
+      <p class="text-sm text-ink-muted sm:text-base">{es.tables.subtitle}</p>
+    </div>
+
+    <button
+      id="open-create-table"
+      type="button"
+      class="inline-flex min-h-11 items-center rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-strong"
+    >
+      {es.tables.addButton}
+    </button>
+  </div>
+
+  <search>
+    <form
+      action="/tables"
+      method="GET"
+      class="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-surface-card p-4 shadow-xs"
+    >
+      <div class="flex min-w-52 flex-1 flex-col gap-1.5">
+        <label for="table-status-filter" class="text-sm font-medium text-ink">
+          {es.tables.statusFilterLabel}
+        </label>
+        <select
+          id="table-status-filter"
+          name="status"
+          class="min-h-11 rounded-lg border border-border bg-white px-3 py-2 text-sm text-ink"
+        >
+          <option value="">{es.tables.allStatuses}</option>
+          {statuses.map((st) => (
+            <option value={st} selected={selectedStatus === st}>
+              {es.tables.statusLabels[st]}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button
+          type="submit"
+          class="inline-flex min-h-11 items-center rounded-lg border border-brand bg-brand-soft px-4 py-2 text-sm font-semibold text-brand-strong transition-colors hover:bg-brand hover:text-white"
+        >
+          {es.tables.searchButton}
+        </button>
+
+        {selectedStatus !== '' && (
+          <a
+            href="/tables"
+            class="inline-flex min-h-11 items-center rounded-lg border border-border px-4 py-2 text-sm font-medium text-ink-muted hover:bg-surface hover:text-ink"
+          >
+            {es.tables.clearSearch}
+          </a>
+        )}
+      </div>
+    </form>
+  </search>
+
+  {loadFailed && (
+    <div
+      role="alert"
+      class="rounded-xl border border-danger/30 bg-danger-soft p-4 text-sm font-medium text-danger"
+    >
+      {es.tables.loadError}
+    </div>
+  )}
+
+  <div class="overflow-hidden rounded-xl border border-border bg-surface-card shadow-xs">
+    {tables.length === 0 ? (
+      <p class="p-8 text-center text-sm text-ink-muted">
+        {selectedStatus !== '' ? es.tables.emptyFiltered : es.tables.emptyTitle}
+      </p>
+    ) : (
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse text-left text-sm">
+          <caption class="sr-only">{es.tables.tableCaption}</caption>
+          <thead class="border-b border-border bg-surface text-xs font-semibold uppercase tracking-wide text-ink-muted">
+            <tr>
+              <th scope="col" class="px-4 py-3">
+                {es.tables.colNumber}
+              </th>
+              <th scope="col" class="px-4 py-3">
+                {es.tables.colLabel}
+              </th>
+              <th scope="col" class="px-4 py-3">
+                {es.tables.colCapacity}
+              </th>
+              <th scope="col" class="px-4 py-3">
+                {es.tables.colStatus}
+              </th>
+              <th scope="col" class="px-4 py-3 text-right">
+                {es.tables.colActions}
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-border/70">
+            {tables.map((table) => (
+              <tr class="hover:bg-surface/60">
+                <td class="px-4 py-3 font-semibold text-ink">
+                  #{table.number}
+                </td>
+                <td class="px-4 py-3 text-ink-muted">
+                  {table.label ?? es.tables.noLabel}
+                </td>
+                <td class="px-4 py-3 text-ink">
+                  {table.capacity} {es.tables.capacitySuffix}
+                </td>
+                <td class="px-4 py-3">
+                  <span
+                    class:list={[
+                      'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold',
+                      table.status === 'available'
+                        ? 'border-success/30 bg-success-soft text-success'
+                        : table.status === 'occupied'
+                          ? 'border-danger/30 bg-danger-soft text-danger'
+                          : 'border-border bg-surface text-ink-muted',
+                    ]}
+                  >
+                    <span
+                      aria-hidden="true"
+                      class:list={[
+                        'inline-block size-1.5 rounded-full',
+                        table.status === 'available'
+                          ? 'bg-success'
+                          : table.status === 'occupied'
+                            ? 'bg-danger'
+                            : 'bg-ink-muted',
+                      ]}
+                    />
+                    <span>{es.tables.statusLabels[table.status]}</span>
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-right">
+                  <div class="inline-flex items-center justify-end gap-2">
+                    <button
+                      type="button"
+                      data-action="edit-table"
+                      data-table-id={String(table.id)}
+                      data-table-number={String(table.number)}
+                      data-table-label={table.label ?? ''}
+                      data-table-capacity={String(table.capacity)}
+                      data-table-status={table.status}
+                      aria-label={`${es.tables.editButton} mesa #${table.number}`}
+                      class="inline-flex min-h-9 items-center rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-ink hover:bg-surface"
+                    >
+                      {es.tables.editButton}
+                    </button>
+                    <button
+                      type="button"
+                      data-action="delete-table"
+                      data-table-id={String(table.id)}
+                      data-table-number={String(table.number)}
+                      aria-label={`${es.tables.deleteButton} mesa #${table.number}`}
+                      class="inline-flex min-h-9 items-center rounded-md border border-danger/30 bg-danger-soft px-3 py-1.5 text-xs font-semibold text-danger hover:bg-danger hover:text-white"
+                    >
+                      {es.tables.deleteButton}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+  </div>
+
+  {meta !== undefined && meta.last_page > 1 && (
+    <nav
+      aria-label={es.tables.tableCaption}
+      class="flex flex-wrap items-center justify-between gap-4 text-sm"
+    >
+      <p class="text-ink-muted">
+        {es.tables.paginationSummary(
+          meta.current_page,
+          meta.last_page,
+          meta.total,
+        )}
+      </p>
+
+      <div class="flex items-center gap-2">
+        {meta.current_page > 1 && (
+          <a
+            href={buildPageHref(meta.current_page - 1)}
+            class="inline-flex min-h-10 items-center rounded-lg border border-border bg-surface-card px-3 py-2 font-medium text-ink hover:bg-surface"
+          >
+            {es.tables.paginationPrev}
+          </a>
+        )}
+        {meta.current_page < meta.last_page && (
+          <a
+            href={buildPageHref(meta.current_page + 1)}
+            class="inline-flex min-h-10 items-center rounded-lg border border-border bg-surface-card px-3 py-2 font-medium text-ink hover:bg-surface"
+          >
+            {es.tables.paginationNext}
+          </a>
+        )}
+      </div>
+    </nav>
+  )}
+
+  <dialog
+    id="table-form-dialog"
+    closedby="any"
+    aria-labelledby="table-form-title"
+    class="m-auto w-[min(92dvw,28rem)] rounded-xl border border-border bg-surface-card p-6 text-ink shadow-xl"
+  >
+    <div class="flex items-start justify-between gap-4">
+      <h1 id="table-form-title" class="text-lg font-bold text-ink">
+        {es.tables.modalCreateTitle}
+      </h1>
+      <form method="dialog">
+        <button
+          type="submit"
+          value="close"
+          class="rounded-md px-2.5 py-1 text-sm font-medium text-ink-muted hover:bg-surface hover:text-ink"
+        >
+          {es.tables.closeButton}
+        </button>
+      </form>
+    </div>
+
+    <form id="table-form" novalidate class="mt-4 space-y-4">
+      <div class="flex flex-col gap-1.5">
+        <label for="table-number" class="text-sm font-medium text-ink">
+          {es.tables.numberLabel}
+        </label>
+        <span id="table-number-hint" class="text-xs text-ink-muted">
+          {es.tables.numberHint}
+        </span>
+        <input
+          id="table-number"
+          name="number"
+          type="text"
+          inputmode="numeric"
+          required
+          autofocus
+          aria-describedby="table-number-hint table-form-error"
+          class="min-h-11 rounded-lg border border-border bg-white px-3 py-2 text-sm text-ink"
+        />
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label for="table-label" class="text-sm font-medium text-ink">
+          {es.tables.labelLabel}
+        </label>
+        <span id="table-label-hint" class="text-xs text-ink-muted">
+          {es.tables.labelHint}
+        </span>
+        <input
+          id="table-label"
+          name="label"
+          type="text"
+          maxlength="100"
+          aria-describedby="table-label-hint"
+          class="min-h-11 rounded-lg border border-border bg-white px-3 py-2 text-sm text-ink"
+        />
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label for="table-capacity" class="text-sm font-medium text-ink">
+          {es.tables.capacityLabel}
+        </label>
+        <input
+          id="table-capacity"
+          name="capacity"
+          type="text"
+          inputmode="numeric"
+          required
+          value="4"
+          aria-describedby="table-form-error"
+          class="min-h-11 rounded-lg border border-border bg-white px-3 py-2 text-sm text-ink"
+        />
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label for="table-status" class="text-sm font-medium text-ink">
+          {es.tables.statusLabel}
+        </label>
+        <select
+          id="table-status"
+          name="status"
+          class="min-h-11 rounded-lg border border-border bg-white px-3 py-2 text-sm text-ink"
+        >
+          {statuses.map((st) => (
+            <option value={st}>{es.tables.statusLabels[st]}</option>
+          ))}
+        </select>
+      </div>
+
+      <p
+        id="table-form-error"
+        role="alert"
+        hidden
+        class="text-xs font-medium text-danger"
+      ></p>
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button
+          type="submit"
+          formmethod="dialog"
+          formnovalidate
+          value="cancel"
+          class="inline-flex min-h-10 items-center rounded-lg border border-border px-4 py-2 text-sm font-medium text-ink-muted hover:bg-surface hover:text-ink"
+        >
+          {es.tables.cancelButton}
+        </button>
+        <button
+          id="table-submit-btn"
+          type="submit"
+          class="inline-flex min-h-10 items-center rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-strong disabled:opacity-60"
+        >
+          {es.tables.saveButton}
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog
+    id="table-delete-dialog"
+    closedby="any"
+    aria-labelledby="table-delete-title"
+    class="m-auto w-[min(92dvw,28rem)] rounded-xl border border-border bg-surface-card p-6 text-ink shadow-xl"
+  >
+    <h1 id="table-delete-title" class="text-lg font-bold text-ink">
+      {es.tables.deleteTitle}
+    </h1>
+    <p id="table-delete-warning" class="mt-2 text-sm text-ink-muted"></p>
+    <p
+      id="table-delete-error"
+      role="alert"
+      hidden
+      class="mt-3 text-xs font-medium text-danger"
+    ></p>
+
+    <div class="mt-6 flex items-center justify-end gap-2">
+      <form method="dialog">
+        <button
+          type="submit"
+          value="cancel"
+          autofocus
+          class="inline-flex min-h-10 items-center rounded-lg border border-border px-4 py-2 text-sm font-medium text-ink hover:bg-surface"
+        >
+          {es.tables.cancelButton}
+        </button>
+      </form>
+      <button
+        id="table-confirm-delete-btn"
+        type="button"
+        class="inline-flex min-h-10 items-center rounded-lg bg-danger px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60"
+      >
+        {es.tables.confirmDeleteButton}
+      </button>
+    </div>
+  </dialog>
+</section>
+
+<script>
+  import { initTablesManager } from './tablesClient';
+
+  initTablesManager();
+</script>

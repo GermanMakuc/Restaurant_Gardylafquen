@@ -1,0 +1,43 @@
+---
+import TablesManager from '../features/tables/TablesManager.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { listTables } from '../lib/api/tables';
+import { es } from '../lib/i18n/es';
+import type { PaginatedResponse } from '../types/api';
+import type { RestaurantTable, TableStatus } from '../types/table';
+
+const rawStatus = Astro.url.searchParams.get('status') ?? '';
+const allowed: TableStatus[] = [
+  'available',
+  'occupied',
+  'reserved',
+  'inactive',
+];
+const selectedStatus = allowed.includes(rawStatus as TableStatus)
+  ? (rawStatus as TableStatus)
+  : '';
+const rawPage = Number(Astro.url.searchParams.get('page') ?? '1');
+const currentPage = Number.isInteger(rawPage) && rawPage > 0 ? rawPage : 1;
+
+let result: PaginatedResponse<RestaurantTable> | null = null;
+let loadFailed = false;
+
+try {
+  result = await listTables({
+    ...(selectedStatus !== '' ? { status: selectedStatus } : {}),
+    sort: 'number',
+    page: currentPage,
+    perPage: 20,
+  });
+} catch {
+  loadFailed = true;
+}
+---
+
+<BaseLayout title={es.tables.pageTitle}>
+  <TablesManager
+    result={result}
+    selectedStatus={selectedStatus}
+    loadFailed={loadFailed}
+  />
+</BaseLayout>

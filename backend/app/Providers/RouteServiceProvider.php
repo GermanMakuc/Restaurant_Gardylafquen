@@ -25,6 +25,8 @@ class RouteServiceProvider extends ServiceProvider
     {
         Route::pattern('category', '[0-9]+');
         Route::pattern('product', '[0-9]+');
+        Route::pattern('waiter', '[0-9]+');
+        Route::pattern('table', '[0-9]+');
 
         parent::boot();
     }

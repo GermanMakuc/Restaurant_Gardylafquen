@@ -1,0 +1,41 @@
+---
+import WaitersManager from '../features/waiters/WaitersManager.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { listWaiters } from '../lib/api/waiters';
+import { es } from '../lib/i18n/es';
+import type { PaginatedResponse } from '../types/api';
+import type { Waiter } from '../types/waiter';
+
+const searchQuery = Astro.url.searchParams.get('q') ?? '';
+const activeFilter = Astro.url.searchParams.get('active') ?? '';
+const rawPage = Number(Astro.url.searchParams.get('page') ?? '1');
+const currentPage = Number.isInteger(rawPage) && rawPage > 0 ? rawPage : 1;
+
+let result: PaginatedResponse<Waiter> | null = null;
+let loadFailed = false;
+
+try {
+  result = await listWaiters({
+    name: searchQuery,
+    ...(activeFilter === 'true'
+      ? { isActive: true }
+      : activeFilter === 'false'
+        ? { isActive: false }
+        : {}),
+    sort: '-created_at',
+    page: currentPage,
+    perPage: 15,
+  });
+} catch {
+  loadFailed = true;
+}
+---
+
+<BaseLayout title={es.waiters.pageTitle}>
+  <WaitersManager
+    result={result}
+    searchQuery={searchQuery}
+    activeFilter={activeFilter}
+    loadFailed={loadFailed}
+  />
+</BaseLayout>

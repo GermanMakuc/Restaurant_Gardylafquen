@@ -14,8 +14,6 @@ Aplicación para gestión de productos, categorías, órdenes/mesas, meseros y c
 | Frontend | Astro + TypeScript estricto + Tailwind CSS, islas interactivas solo donde haga falta |
 | Infra local | Docker Compose (`backend`, `frontend`, `db`) |
 
-> **Estado actual:** migración completada al monorepo (`backend/` sobre Laravel 12 / PHP 8.3 con Sanctum + `frontend/` sobre Astro SSR + Tailwind CSS). El código legado de Laravel 5.7 fue retirado en la Fase 4.
-
 ## 2. Estructura del monorepo
 
 ```
@@ -81,8 +79,6 @@ Route → Controller → (FormRequest → DTO) → Service → Repository (inter
 
 ### 3.3 Ejemplo mínimo (referencia de estilo)
 
-> Sintaxis **objetivo** (PHP 8.3). Mientras el proyecto siga en PHP 7.4 se aplica la equivalencia de §13 (propiedades tipadas `private` + constructor explícito, sin `readonly` ni promoción).
-
 ```php
 // DTO
 final readonly class CreateProductDto
@@ -124,7 +120,7 @@ final class ProductController extends Controller
 
 - Prefijo y versionado: `/api/v1/...`. Cambios incompatibles ⇒ `/api/v2`.
 - Recursos en **plural, minúscula, kebab-case, en inglés**: `/products`, `/categories`, `/orders`, `/waiters`, `/tables`, `/sales`.
-- Verbos HTTP correctos: `GET` (leer), `POST` (crear), `PUT/PATCH` (actualizar), `DELETE` (borrar). Prohibido usar `POST` para borrar/actualizar (como en el legado).
+- Verbos HTTP correctos: `GET` (leer), `POST` (crear), `PUT/PATCH` (actualizar), `DELETE` (borrar). Prohibido usar `POST` para borrar o actualizar.
 - Códigos: `200`, `201` (con `Location`), `204` (sin cuerpo), `401`, `403`, `404`, `409`, `422` (validación), `500`. Nunca `200` con un error dentro.
 - Respuesta de éxito: `{ "data": ... }` (+ `links`/`meta` si hay paginación). Todas las listas se **paginan**.
 - Respuesta de error uniforme (manejada en el `Handler` global):
@@ -181,26 +177,17 @@ final class ProductController extends Controller
 - Configuración por variables de entorno; `.env.example` siempre actualizado en `backend/` y `frontend/`.
 - Las migraciones se ejecutan al iniciar solo en desarrollo; en producción de forma explícita.
 
-## 10. Dominio y glosario (legado ES → código EN)
+## 10. Dominio y glosario
 
-| Legado (ES) | Código (EN) |
+| Concepto (ES) | Código (EN) |
 |---|---|
 | Productos | `Product` |
 | Categorías | `Category` |
-| Orden / Mesa (state) | `Order`, `Table` |
-| Meseros (User) | `Waiter` (`User` queda para autenticación) |
-| Ticket / Ventas (Result) | `Ticket` / `Sale` |
+| Orden / Mesa | `Order`, `Table` |
+| Meseros | `Waiter` (`User` se reserva para autenticación) |
+| Ticket / Ventas | `Ticket` / `Sale` |
 
-## 11. Plan de migración (por fases)
-
-1. **Fase 0** — Esta regla aprobada. ✅ *(este documento)*
-2. **Fase 1** — Scaffolding: `backend/`, `frontend/`, Docker Compose del monorepo y CI de lint/tests. ✅
-3. **Fase 2** — Migración por dominio (Categorías → Productos → Meseros/Mesas → Órdenes → Ventas/Tickets) con migraciones, DTOs, Repository, Service, Controller, Resource, tests, OpenAPI y pantallas Astro. ✅
-4. **Fase 3** — Autenticación, roles (`admin`, `cashier`, `waiter`), Policies y sesión Astro mediante cookies `httpOnly` + proxy BFF. ✅
-5. **Fase 4** — Retiro completo del código legado de la raíz. ✅
-6. **Fase 5** — Actualización a Laravel 12 + PHP 8.3+, sintaxis objetivo (`final readonly` DTOs, `enum`, `match`, constructor promovido), Sanctum, Pint y Larastan nivel 8. ✅
-
-## 12. Instrucciones para agentes de IA
+## 11. Instrucciones para agentes de IA
 
 - Leer este archivo antes de cualquier cambio y **citar la sección** cuando una decisión dependa de ella.
 - Respetar el flujo `Controller → Service → Repository`; si falta una capa para la funcionalidad pedida, crearla en lugar de saltársela.
@@ -208,9 +195,7 @@ final class ProductController extends Controller
 - Verificar con lint, análisis estático y tests antes de dar una tarea por terminada.
 - Ante ambigüedad de negocio, **preguntar** en lugar de asumir.
 
-## 13. Convenciones activas del stack actualizado (Laravel 12 / PHP 8.3+)
-
-Las equivalencias temporales de Laravel 5.7 / PHP 7.4 fueron completadas en la Fase 5. Todo código nuevo debe usar directamente la sintaxis y herramientas objetivo:
+## 12. Convenciones del stack (Laravel 12 / PHP 8.3+)
 
 - **DTOs:** `final readonly class` con propiedades públicas promovidas en `__construct` y normalización de entrada en `fromArray()`.
 - **Enums:** enums nativos respaldados por `string` (`enum OrderStatus: string`, `TableStatus`, `UserRole`) con `values(): array`.

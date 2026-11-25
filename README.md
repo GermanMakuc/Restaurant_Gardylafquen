@@ -4,7 +4,7 @@ Aplicación para la gestión de productos, categorías, órdenes/mesas, meseros 
 
 ## Arquitectura (monorepo)
 
-- [`backend/`](backend/): API REST pura en Laravel 12 (PHP 8.3+, `/api/v1/...`), arquitectura por capas (`Controller → FormRequest → DTO → Service → Repository → Model`), documentada en [`backend/docs/openapi.yaml`](backend/docs/openapi.yaml).
+- [`backend/`](backend/): API REST pura en Laravel 13 (PHP 8.6, `/api/v1/...`), arquitectura por capas (`Controller → FormRequest → DTO → Service → Repository → Model`), documentada en [`backend/docs/openapi.yaml`](backend/docs/openapi.yaml).
 - [`frontend/`](frontend/): Astro + TypeScript estricto + Tailwind CSS (sesión mediante cookie `httpOnly` en BFF de Astro).
 - [`AGENTS.md`](AGENTS.md): fuente de verdad de arquitectura, convenciones y flujo de desarrollo.
 
@@ -33,7 +33,7 @@ Servicios disponibles:
 | Servicio | URL / Puerto | Notas |
 |---|---|---|
 | Frontend (Astro) | `http://localhost:4321` | Interfaz web y endpoints BFF (`/api/auth/*`, `/api/proxy/*`) |
-| Backend API (PHP 8.3 + Apache) | `http://localhost:8000/api/v1/health` | API REST `/api/v1/...` |
+| Backend API (PHP 8.6 + Apache) | `http://localhost:8000/api/v1/health` | API REST `/api/v1/...` |
 | MySQL 8.0 | `localhost:3307` | BD `restaurant`, usuario `restaurant`, clave `secret` |
 
 ### Usuarios demo (seeder)
@@ -66,7 +66,7 @@ docker compose down -v         # detener y borrar volúmenes/base de datos
 
 ### Backend (`backend/`)
 
-Requisitos: PHP 8.3+ (con extensiones `pdo_mysql`, `gd`, `mbstring`, `xml`), Composer y MySQL 8.
+Requisitos: PHP 8.5+ (probado con PHP 8.6; extensiones `pdo_mysql`, `gd`, `mbstring`, `xml`), Composer y MySQL 8.
 
 ```bash
 cd backend

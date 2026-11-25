@@ -8,7 +8,7 @@ Aplicación para gestión de productos, categorías, órdenes/mesas, meseros y c
 
 | Capa | Tecnología |
 |---|---|
-| Backend | Laravel 12 + PHP 8.3+ — **API REST pura** (JSON) |
+| Backend | Laravel 13 + PHP 8.6 — **API REST pura** (JSON) |
 | Base de datos | MySQL 8 |
 | Autenticación | Laravel Sanctum (tokens Bearer) |
 | Frontend | Astro + TypeScript estricto + Tailwind CSS, islas interactivas solo donde haga falta |
@@ -195,11 +195,11 @@ final class ProductController extends Controller
 - Verificar con lint, análisis estático y tests antes de dar una tarea por terminada.
 - Ante ambigüedad de negocio, **preguntar** en lugar de asumir.
 
-## 12. Convenciones del stack (Laravel 12 / PHP 8.3+)
+## 12. Convenciones del stack (Laravel 13 / PHP 8.6)
 
 - **DTOs:** `final readonly class` con propiedades públicas promovidas en `__construct` y normalización de entrada en `fromArray()`.
 - **Enums:** enums nativos respaldados por `string` (`enum OrderStatus: string`, `TableStatus`, `UserRole`) con `values(): array`.
 - **Services, Controllers y Repositories:** `final` / `final readonly` con promoción de constructor `private readonly`, `declare(strict_types=1);`, `match` y funciones nativas (`str_contains`, `str_starts_with`).
 - **Autenticación:** Laravel Sanctum (`HasApiTokens` en `User`, middleware `auth:sanctum`, encapsulado en `AuthService` + `AuthRepositoryInterface`).
-- **Calidad y BD:** `./vendor/bin/pint --test` (preset PSR-12 en `pint.json`), `./vendor/bin/phpstan analyse` (Larastan nivel 8), `./vendor/bin/phpunit` (PHPUnit 11 sobre SQLite `:memory:` con `<server>` + `<env force="true">` en `phpunit.xml`) y `Model::preventLazyLoading(! $this->app->isProduction())` activo en `AppServiceProvider`.
-- **Docker:** imagen `backend` sobre `php:8.3-apache`.
+- **Calidad y BD:** `./vendor/bin/pint --test` (preset PSR-12 en `pint.json`), `./vendor/bin/phpstan analyse` (Larastan nivel 8), `./vendor/bin/phpunit` (PHPUnit 12 sobre SQLite `:memory:` con `<server>` + `<env force="true">` en `phpunit.xml`) y `Model::preventLazyLoading(! $this->app->isProduction())` activo en `AppServiceProvider`.
+- **Docker:** imagen `backend` sobre `php:8.6-apache`.

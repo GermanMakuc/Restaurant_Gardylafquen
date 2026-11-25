@@ -20,6 +20,7 @@ use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 
 final class ProductServiceTest extends TestCase
@@ -27,8 +28,8 @@ final class ProductServiceTest extends TestCase
     public function test_list_delegates_to_repository(): void
     {
         $dto = new ListProductsDto('Salmón', 2, 'name', 10);
-        /** @var LengthAwarePaginator<int, Product>&MockObject $paginator */
-        $paginator = $this->createMock(LengthAwarePaginator::class);
+        /** @var LengthAwarePaginator<int, Product>&Stub $paginator */
+        $paginator = $this->createStub(LengthAwarePaginator::class);
 
         /** @var ProductRepositoryInterface&MockObject $products */
         $products = $this->createMock(ProductRepositoryInterface::class);
@@ -37,10 +38,10 @@ final class ProductServiceTest extends TestCase
             ->with($dto)
             ->willReturn($paginator);
 
-        /** @var CategoryRepositoryInterface&MockObject $categories */
-        $categories = $this->createMock(CategoryRepositoryInterface::class);
-        /** @var FilesystemFactory&MockObject $filesystems */
-        $filesystems = $this->createMock(FilesystemFactory::class);
+        /** @var CategoryRepositoryInterface&Stub $categories */
+        $categories = $this->createStub(CategoryRepositoryInterface::class);
+        /** @var FilesystemFactory&Stub $filesystems */
+        $filesystems = $this->createStub(FilesystemFactory::class);
 
         $service = new ProductService($products, $categories, $filesystems);
 
@@ -53,10 +54,10 @@ final class ProductServiceTest extends TestCase
         $products = $this->createMock(ProductRepositoryInterface::class);
         $products->expects($this->once())->method('findById')->with(42)->willReturn(null);
 
-        /** @var CategoryRepositoryInterface&MockObject $categories */
-        $categories = $this->createMock(CategoryRepositoryInterface::class);
-        /** @var FilesystemFactory&MockObject $filesystems */
-        $filesystems = $this->createMock(FilesystemFactory::class);
+        /** @var CategoryRepositoryInterface&Stub $categories */
+        $categories = $this->createStub(CategoryRepositoryInterface::class);
+        /** @var FilesystemFactory&Stub $filesystems */
+        $filesystems = $this->createStub(FilesystemFactory::class);
 
         $service = new ProductService($products, $categories, $filesystems);
 
@@ -80,8 +81,8 @@ final class ProductServiceTest extends TestCase
         $categories = $this->createMock(CategoryRepositoryInterface::class);
         $categories->expects($this->once())->method('findById')->with(3)->willReturn($category);
 
-        /** @var FilesystemFactory&MockObject $filesystems */
-        $filesystems = $this->createMock(FilesystemFactory::class);
+        /** @var FilesystemFactory&Stub $filesystems */
+        $filesystems = $this->createStub(FilesystemFactory::class);
 
         $service = new ProductService($products, $categories, $filesystems);
 
@@ -100,8 +101,8 @@ final class ProductServiceTest extends TestCase
         $categories = $this->createMock(CategoryRepositoryInterface::class);
         $categories->expects($this->once())->method('findById')->with(99)->willReturn(null);
 
-        /** @var FilesystemFactory&MockObject $filesystems */
-        $filesystems = $this->createMock(FilesystemFactory::class);
+        /** @var FilesystemFactory&Stub $filesystems */
+        $filesystems = $this->createStub(FilesystemFactory::class);
 
         $service = new ProductService($products, $categories, $filesystems);
 
@@ -128,8 +129,8 @@ final class ProductServiceTest extends TestCase
         $categories = $this->createMock(CategoryRepositoryInterface::class);
         $categories->expects($this->once())->method('findById')->with(2)->willReturn($category);
 
-        /** @var FilesystemFactory&MockObject $filesystems */
-        $filesystems = $this->createMock(FilesystemFactory::class);
+        /** @var FilesystemFactory&Stub $filesystems */
+        $filesystems = $this->createStub(FilesystemFactory::class);
 
         $service = new ProductService($products, $categories, $filesystems);
 
@@ -153,7 +154,7 @@ final class ProductServiceTest extends TestCase
                 $this->callback(static function (string $path): bool {
                     return str_starts_with($path, 'products/8-') && str_ends_with($path, '.jpg');
                 }),
-                $this->isType('string')
+                $this->isString()
             )
             ->willReturn(true);
         $disk->expects($this->once())
@@ -173,8 +174,8 @@ final class ProductServiceTest extends TestCase
             ->with($existing, $this->stringStartsWith('products/8-'))
             ->willReturn($updated);
 
-        /** @var CategoryRepositoryInterface&MockObject $categories */
-        $categories = $this->createMock(CategoryRepositoryInterface::class);
+        /** @var CategoryRepositoryInterface&Stub $categories */
+        $categories = $this->createStub(CategoryRepositoryInterface::class);
 
         $service = new ProductService($products, $categories, $filesystems, 'public');
         $result = $service->uploadImage(8, new UploadProductImageDto($file));
@@ -192,10 +193,10 @@ final class ProductServiceTest extends TestCase
         $products->expects($this->once())->method('findById')->with(12)->willReturn($existing);
         $products->expects($this->once())->method('delete')->with($existing);
 
-        /** @var CategoryRepositoryInterface&MockObject $categories */
-        $categories = $this->createMock(CategoryRepositoryInterface::class);
-        /** @var FilesystemFactory&MockObject $filesystems */
-        $filesystems = $this->createMock(FilesystemFactory::class);
+        /** @var CategoryRepositoryInterface&Stub $categories */
+        $categories = $this->createStub(CategoryRepositoryInterface::class);
+        /** @var FilesystemFactory&Stub $filesystems */
+        $filesystems = $this->createStub(FilesystemFactory::class);
 
         $service = new ProductService($products, $categories, $filesystems);
         $service->delete(12);

@@ -14,6 +14,7 @@ use App\Repositories\Contracts\WaiterRepositoryInterface;
 use App\Services\WaiterService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 
 final class WaiterServiceTest extends TestCase
@@ -21,8 +22,8 @@ final class WaiterServiceTest extends TestCase
     public function test_list_delegates_to_repository(): void
     {
         $dto = new ListWaitersDto('Camila', true, 'name', 10);
-        /** @var LengthAwarePaginator<int, Waiter>&MockObject $paginator */
-        $paginator = $this->createMock(LengthAwarePaginator::class);
+        /** @var LengthAwarePaginator<int, Waiter>&Stub $paginator */
+        $paginator = $this->createStub(LengthAwarePaginator::class);
 
         /** @var WaiterRepositoryInterface&MockObject $repository */
         $repository = $this->createMock(WaiterRepositoryInterface::class);

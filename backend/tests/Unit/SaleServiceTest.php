@@ -22,6 +22,7 @@ use App\Repositories\Contracts\TableRepositoryInterface;
 use App\Services\SaleService;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use Tests\TestCase;
 
 final class SaleServiceTest extends TestCase
@@ -35,10 +36,10 @@ final class SaleServiceTest extends TestCase
         $sales = $this->createMock(SaleRepositoryInterface::class);
         $sales->expects($this->once())->method('summarize')->with($dto)->willReturn($summary);
 
-        /** @var OrderRepositoryInterface&MockObject $orders */
-        $orders = $this->createMock(OrderRepositoryInterface::class);
-        /** @var TableRepositoryInterface&MockObject $tables */
-        $tables = $this->createMock(TableRepositoryInterface::class);
+        /** @var OrderRepositoryInterface&Stub $orders */
+        $orders = $this->createStub(OrderRepositoryInterface::class);
+        /** @var TableRepositoryInterface&Stub $tables */
+        $tables = $this->createStub(TableRepositoryInterface::class);
 
         $service = new SaleService($sales, $orders, $tables);
 
@@ -51,10 +52,10 @@ final class SaleServiceTest extends TestCase
         $sales = $this->createMock(SaleRepositoryInterface::class);
         $sales->expects($this->once())->method('findById')->with(88)->willReturn(null);
 
-        /** @var OrderRepositoryInterface&MockObject $orders */
-        $orders = $this->createMock(OrderRepositoryInterface::class);
-        /** @var TableRepositoryInterface&MockObject $tables */
-        $tables = $this->createMock(TableRepositoryInterface::class);
+        /** @var OrderRepositoryInterface&Stub $orders */
+        $orders = $this->createStub(OrderRepositoryInterface::class);
+        /** @var TableRepositoryInterface&Stub $tables */
+        $tables = $this->createStub(TableRepositoryInterface::class);
 
         $service = new SaleService($sales, $orders, $tables);
 
@@ -89,7 +90,7 @@ final class SaleServiceTest extends TestCase
         $sales->expects($this->once())->method('existsForOrder')->with(7)->willReturn(false);
         $sales->expects($this->once())
             ->method('create')
-            ->with(7, 10, 1000000, 100000, 1100000, $this->isType('string'))
+            ->with(7, 10, 1000000, 100000, 1100000, $this->isString())
             ->willReturn($sale);
 
         /** @var OrderRepositoryInterface&MockObject $orders */
@@ -114,13 +115,13 @@ final class SaleServiceTest extends TestCase
 
     public function test_create_throws_when_order_does_not_exist(): void
     {
-        /** @var SaleRepositoryInterface&MockObject $sales */
-        $sales = $this->createMock(SaleRepositoryInterface::class);
+        /** @var SaleRepositoryInterface&Stub $sales */
+        $sales = $this->createStub(SaleRepositoryInterface::class);
         /** @var OrderRepositoryInterface&MockObject $orders */
         $orders = $this->createMock(OrderRepositoryInterface::class);
         $orders->expects($this->once())->method('findById')->with(99)->willReturn(null);
-        /** @var TableRepositoryInterface&MockObject $tables */
-        $tables = $this->createMock(TableRepositoryInterface::class);
+        /** @var TableRepositoryInterface&Stub $tables */
+        $tables = $this->createStub(TableRepositoryInterface::class);
 
         $service = new SaleService($sales, $orders, $tables);
 
@@ -133,13 +134,13 @@ final class SaleServiceTest extends TestCase
         $order = new Order(['table_id' => 3, 'status' => OrderStatus::PAID->value, 'subtotal_cents' => 500000]);
         $order->id = 7;
 
-        /** @var SaleRepositoryInterface&MockObject $sales */
-        $sales = $this->createMock(SaleRepositoryInterface::class);
+        /** @var SaleRepositoryInterface&Stub $sales */
+        $sales = $this->createStub(SaleRepositoryInterface::class);
         /** @var OrderRepositoryInterface&MockObject $orders */
         $orders = $this->createMock(OrderRepositoryInterface::class);
         $orders->expects($this->once())->method('findById')->with(7)->willReturn($order);
-        /** @var TableRepositoryInterface&MockObject $tables */
-        $tables = $this->createMock(TableRepositoryInterface::class);
+        /** @var TableRepositoryInterface&Stub $tables */
+        $tables = $this->createStub(TableRepositoryInterface::class);
 
         $service = new SaleService($sales, $orders, $tables);
 
@@ -158,8 +159,8 @@ final class SaleServiceTest extends TestCase
         /** @var OrderRepositoryInterface&MockObject $orders */
         $orders = $this->createMock(OrderRepositoryInterface::class);
         $orders->expects($this->once())->method('findById')->with(7)->willReturn($order);
-        /** @var TableRepositoryInterface&MockObject $tables */
-        $tables = $this->createMock(TableRepositoryInterface::class);
+        /** @var TableRepositoryInterface&Stub $tables */
+        $tables = $this->createStub(TableRepositoryInterface::class);
 
         $service = new SaleService($sales, $orders, $tables);
 

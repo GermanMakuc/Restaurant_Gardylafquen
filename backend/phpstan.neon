@@ -13,6 +13,7 @@ parameters:
     - app/Http/Resources
     - app/Models
     - app/Policies
+    - app/Providers/AppServiceProvider.php
     - app/Providers/RepositoryServiceProvider.php
     - app/Repositories
     - app/Services

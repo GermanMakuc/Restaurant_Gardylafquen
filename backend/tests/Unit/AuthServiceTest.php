@@ -12,6 +12,7 @@ use App\Repositories\Contracts\AuthRepositoryInterface;
 use App\Services\AuthService;
 use Illuminate\Contracts\Hashing\Hasher;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 
 final class AuthServiceTest extends TestCase
@@ -52,8 +53,8 @@ final class AuthServiceTest extends TestCase
         $auth->expects($this->once())->method('findByEmail')->with('missing@gardylafquen.test')->willReturn(null);
         $auth->expects($this->never())->method('issueToken');
 
-        /** @var Hasher&MockObject $hasher */
-        $hasher = $this->createMock(Hasher::class);
+        /** @var Hasher&Stub $hasher */
+        $hasher = $this->createStub(Hasher::class);
 
         $service = new AuthService($auth, $hasher);
 
@@ -69,8 +70,8 @@ final class AuthServiceTest extends TestCase
         $auth = $this->createMock(AuthRepositoryInterface::class);
         $auth->expects($this->once())->method('revokeToken')->with($user);
 
-        /** @var Hasher&MockObject $hasher */
-        $hasher = $this->createMock(Hasher::class);
+        /** @var Hasher&Stub $hasher */
+        $hasher = $this->createStub(Hasher::class);
 
         $service = new AuthService($auth, $hasher);
         $service->logout($user);

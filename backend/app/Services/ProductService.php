@@ -119,7 +119,6 @@ final class ProductService
 
         $dst = imagecreatetruecolor($targetSize, $targetSize);
         if ($dst === false) {
-            imagedestroy($src);
             throw new RuntimeException('No se pudo inicializar el lienzo de imagen.');
         }
 
@@ -133,9 +132,6 @@ final class ProductService
         ob_start();
         imagejpeg($dst, null, 90);
         $encoded = (string) ob_get_clean();
-
-        imagedestroy($src);
-        imagedestroy($dst);
 
         return $encoded;
     }

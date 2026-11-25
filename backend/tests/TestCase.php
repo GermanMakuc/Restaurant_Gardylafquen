@@ -11,8 +11,6 @@ use Laravel\Sanctum\Sanctum;
 
 abstract class TestCase extends BaseTestCase
 {
-    use CreatesApplication;
-
     protected function actingAsRole(UserRole $role = UserRole::ADMIN): User
     {
         /** @var User $user */

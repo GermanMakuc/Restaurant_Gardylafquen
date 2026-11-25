@@ -15,6 +15,7 @@ use App\Repositories\Contracts\TableRepositoryInterface;
 use App\Services\TableService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 
 final class TableServiceTest extends TestCase
@@ -22,8 +23,8 @@ final class TableServiceTest extends TestCase
     public function test_list_delegates_to_repository(): void
     {
         $dto = new ListTablesDto(TableStatus::AVAILABLE->value, 'number', 20);
-        /** @var LengthAwarePaginator<int, Table>&MockObject $paginator */
-        $paginator = $this->createMock(LengthAwarePaginator::class);
+        /** @var LengthAwarePaginator<int, Table>&Stub $paginator */
+        $paginator = $this->createStub(LengthAwarePaginator::class);
 
         /** @var TableRepositoryInterface&MockObject $repository */
         $repository = $this->createMock(TableRepositoryInterface::class);

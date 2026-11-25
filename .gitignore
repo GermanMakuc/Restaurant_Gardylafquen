@@ -17,6 +17,7 @@
 /frontend/.env.*.local
 
 # Laravel (backend)
+/backend/bootstrap/cache/*.php
 /backend/public/hot
 /backend/public/storage
 /backend/storage/*.key

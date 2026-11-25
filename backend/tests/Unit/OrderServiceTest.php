@@ -24,6 +24,7 @@ use App\Repositories\Contracts\WaiterRepositoryInterface;
 use App\Services\OrderService;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use Tests\TestCase;
 
 final class OrderServiceTest extends TestCase
@@ -98,10 +99,10 @@ final class OrderServiceTest extends TestCase
         $tables = $this->createMock(TableRepositoryInterface::class);
         $tables->expects($this->once())->method('findById')->with(4)->willReturn($table);
 
-        /** @var WaiterRepositoryInterface&MockObject $waiters */
-        $waiters = $this->createMock(WaiterRepositoryInterface::class);
-        /** @var ProductRepositoryInterface&MockObject $products */
-        $products = $this->createMock(ProductRepositoryInterface::class);
+        /** @var WaiterRepositoryInterface&Stub $waiters */
+        $waiters = $this->createStub(WaiterRepositoryInterface::class);
+        /** @var ProductRepositoryInterface&Stub $products */
+        $products = $this->createStub(ProductRepositoryInterface::class);
 
         $service = new OrderService($orders, $tables, $waiters, $products);
 
@@ -128,8 +129,8 @@ final class OrderServiceTest extends TestCase
         $waiters = $this->createMock(WaiterRepositoryInterface::class);
         $waiters->expects($this->once())->method('findById')->with(3)->willReturn($waiter);
 
-        /** @var ProductRepositoryInterface&MockObject $products */
-        $products = $this->createMock(ProductRepositoryInterface::class);
+        /** @var ProductRepositoryInterface&Stub $products */
+        $products = $this->createStub(ProductRepositoryInterface::class);
 
         $service = new OrderService($orders, $tables, $waiters, $products);
 
@@ -156,10 +157,10 @@ final class OrderServiceTest extends TestCase
         $tables->expects($this->once())->method('findById')->with(6)->willReturn($table);
         $tables->expects($this->once())->method('updateStatus')->with($table, TableStatus::AVAILABLE->value)->willReturn($table);
 
-        /** @var WaiterRepositoryInterface&MockObject $waiters */
-        $waiters = $this->createMock(WaiterRepositoryInterface::class);
-        /** @var ProductRepositoryInterface&MockObject $products */
-        $products = $this->createMock(ProductRepositoryInterface::class);
+        /** @var WaiterRepositoryInterface&Stub $waiters */
+        $waiters = $this->createStub(WaiterRepositoryInterface::class);
+        /** @var ProductRepositoryInterface&Stub $products */
+        $products = $this->createStub(ProductRepositoryInterface::class);
 
         DB::shouldReceive('transaction')->once()->andReturnUsing(static function (callable $callback) {
             return $callback();
@@ -180,12 +181,12 @@ final class OrderServiceTest extends TestCase
         $orders = $this->createMock(OrderRepositoryInterface::class);
         $orders->expects($this->once())->method('findById')->with(9)->willReturn($order);
 
-        /** @var TableRepositoryInterface&MockObject $tables */
-        $tables = $this->createMock(TableRepositoryInterface::class);
-        /** @var WaiterRepositoryInterface&MockObject $waiters */
-        $waiters = $this->createMock(WaiterRepositoryInterface::class);
-        /** @var ProductRepositoryInterface&MockObject $products */
-        $products = $this->createMock(ProductRepositoryInterface::class);
+        /** @var TableRepositoryInterface&Stub $tables */
+        $tables = $this->createStub(TableRepositoryInterface::class);
+        /** @var WaiterRepositoryInterface&Stub $waiters */
+        $waiters = $this->createStub(WaiterRepositoryInterface::class);
+        /** @var ProductRepositoryInterface&Stub $products */
+        $products = $this->createStub(ProductRepositoryInterface::class);
 
         $service = new OrderService($orders, $tables, $waiters, $products);
 
@@ -202,12 +203,12 @@ final class OrderServiceTest extends TestCase
         $orders = $this->createMock(OrderRepositoryInterface::class);
         $orders->expects($this->once())->method('findById')->with(9)->willReturn($order);
 
-        /** @var TableRepositoryInterface&MockObject $tables */
-        $tables = $this->createMock(TableRepositoryInterface::class);
-        /** @var WaiterRepositoryInterface&MockObject $waiters */
-        $waiters = $this->createMock(WaiterRepositoryInterface::class);
-        /** @var ProductRepositoryInterface&MockObject $products */
-        $products = $this->createMock(ProductRepositoryInterface::class);
+        /** @var TableRepositoryInterface&Stub $tables */
+        $tables = $this->createStub(TableRepositoryInterface::class);
+        /** @var WaiterRepositoryInterface&Stub $waiters */
+        $waiters = $this->createStub(WaiterRepositoryInterface::class);
+        /** @var ProductRepositoryInterface&Stub $products */
+        $products = $this->createStub(ProductRepositoryInterface::class);
 
         $service = new OrderService($orders, $tables, $waiters, $products);
 

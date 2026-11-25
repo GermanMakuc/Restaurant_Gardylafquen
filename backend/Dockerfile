@@ -5,7 +5,7 @@ COPY composer.json composer.lock ./
 RUN composer install --no-scripts --no-autoloader --no-interaction --prefer-dist --ignore-platform-reqs
 
 # ---- Imagen de la aplicación ----
-FROM php:8.3-apache
+FROM php:8.6-apache
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libpng-dev libjpeg-dev libfreetype6-dev libzip-dev libonig-dev libsqlite3-dev unzip git \

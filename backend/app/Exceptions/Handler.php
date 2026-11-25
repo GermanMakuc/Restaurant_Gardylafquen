@@ -7,47 +7,16 @@ namespace App\Exceptions;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
-class Handler extends ExceptionHandler
+final class Handler
 {
-    /** @var array<int, class-string<Throwable>> */
-    protected $dontReport = [
-        DomainException::class,
-    ];
-
-    /** @var array<int, string> */
-    protected $dontFlash = [
-        'current_password',
-        'password',
-        'password_confirmation',
-    ];
-
-    public function report(Throwable $e): void
-    {
-        parent::report($e);
-    }
-
-    /**
-     * @param  Request  $request
-     */
-    public function render($request, Throwable $e): Response
-    {
-        if ($request->is('api/*') || $request->expectsJson()) {
-            return $this->renderApiException($e);
-        }
-
-        return parent::render($request, $e);
-    }
-
-    private function renderApiException(Throwable $exception): JsonResponse
+    public static function renderApiException(Throwable $exception): JsonResponse
     {
         if ($exception instanceof ValidationException) {
             return new JsonResponse([
@@ -64,7 +33,7 @@ class Handler extends ExceptionHandler
             ], 401);
         }
 
-        if ($exception instanceof AuthorizationException) {
+        if ($exception instanceof AuthorizationException || $exception instanceof AccessDeniedHttpException) {
             return new JsonResponse([
                 'message' => 'No tienes permisos para realizar esta acción.',
                 'code' => 'forbidden',

@@ -1,0 +1,80 @@
+openapi: 3.0.3
+info:
+  title: Restaurant Gardylafquen API
+  version: 1.0.0
+  description: >
+    API REST pura para la gestión de productos, categorías, mesas, órdenes,
+    meseros y ventas de Restaurant Gardylafquen.
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Entorno local (Docker)
+paths:
+  /health:
+    get:
+      summary: Estado de la API y conexión a base de datos
+      operationId: getHealth
+      tags:
+        - System
+      responses:
+        "200":
+          description: Servicio operativo
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: "#/components/schemas/HealthStatus"
+        "503":
+          description: Base de datos no disponible
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - data
+                properties:
+                  data:
+                    $ref: "#/components/schemas/HealthStatus"
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      required:
+        - status
+        - service
+        - database
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded]
+        service:
+          type: string
+          example: restaurant-gardylafquen-api
+        database:
+          type: string
+          enum: [ok, error]
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-11-24T21:00:00Z"
+    ErrorResponse:
+      type: object
+      required:
+        - message
+        - code
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+          example: validation_error
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string

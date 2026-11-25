@@ -1,17 +1,32 @@
 # Dependencias
 /vendor
 /node_modules
+/backend/vendor
+/frontend/node_modules
+
+# Builds / generados
+/frontend/dist
+/frontend/.astro
 
 # Entorno / secretos
 .env
 .env.backup
 .env.*.local
+/backend/.env
+/backend/.env.backup
+/backend/.env.*.local
+/frontend/.env
+/frontend/.env.*.local
 
 # Laravel
 /public/hot
 /public/storage
 /storage/*.key
 /storage/logs/*.log
+/backend/public/hot
+/backend/public/storage
+/backend/storage/*.key
+/backend/storage/logs/*.log
 Homestead.json
 Homestead.yaml
 auth.json

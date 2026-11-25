@@ -1,0 +1,18 @@
+parameters:
+  level: 8
+  paths:
+    - app/DTOs
+    - app/Enums
+    - app/Exceptions
+    - app/Http/Controllers/Api
+    - app/Http/Middleware/Cors.php
+    - app/Http/Requests
+    - app/Http/Resources
+    - app/Models
+    - app/Policies
+    - app/Providers/RepositoryServiceProvider.php
+    - app/Repositories
+    - app/Services
+    - routes/api.php
+    - tests/Unit/HealthServiceTest.php
+    - tests/Feature/HealthEndpointTest.php

@@ -1,0 +1,50 @@
+---
+import HealthBadge from '../features/system/HealthBadge.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getHealthStatus } from '../lib/api/health';
+import { es } from '../lib/i18n/es';
+import type { HealthStatus } from '../types/api';
+
+let health: HealthStatus | null = null;
+
+try {
+  health = await getHealthStatus();
+} catch {
+  health = null;
+}
+---
+
+<BaseLayout title={es.home.pageTitle}>
+  <section class="space-y-8">
+    <div class="space-y-2">
+      <h1 class="text-2xl font-bold tracking-tight text-ink sm:text-3xl">
+        {es.home.heading}
+      </h1>
+      <p class="max-w-2xl text-sm text-ink-muted sm:text-base">
+        {es.home.subtitle}
+      </p>
+    </div>
+
+    <HealthBadge health={health} />
+
+    <section aria-labelledby="modules-heading" class="space-y-4">
+      <h2 id="modules-heading" class="text-base font-semibold text-ink">
+        {es.home.modulesSectionTitle}
+      </h2>
+
+      <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {es.home.modules.map((mod) => (
+          <li class="flex flex-col justify-between rounded-xl border border-border bg-surface-card p-5 shadow-xs">
+            <div>
+              <h3 class="text-base font-semibold text-ink">{mod.name}</h3>
+              <p class="mt-1 text-sm text-ink-muted">{mod.description}</p>
+            </div>
+            <p class="mt-4 inline-flex w-fit rounded-md bg-surface px-2.5 py-1 text-xs font-medium text-ink-muted">
+              {es.home.pendingBadge}
+            </p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  </section>
+</BaseLayout>

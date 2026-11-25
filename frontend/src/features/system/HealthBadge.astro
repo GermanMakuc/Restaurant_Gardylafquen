@@ -1,0 +1,71 @@
+---
+import { es } from '../../lib/i18n/es';
+import type { HealthStatus } from '../../types/api';
+
+interface Props {
+  health: HealthStatus | null;
+}
+
+const { health } = Astro.props;
+
+const isOk = health?.status === 'ok';
+const isDegraded = health?.status === 'degraded';
+
+const apiStatusText = isOk
+  ? es.health.statusOk
+  : isDegraded
+    ? es.health.statusDegraded
+    : es.health.statusUnreachable;
+
+const dbStatusText =
+  health?.database === 'ok' ? es.health.dbOk : es.health.dbError;
+---
+
+<section
+  aria-labelledby="api-health-heading"
+  class="rounded-xl border border-border bg-surface-card p-6 shadow-xs"
+>
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <h2 id="api-health-heading" class="text-base font-semibold text-ink">
+      {es.home.apiSectionTitle}
+    </h2>
+    <span
+      class:list={[
+        'inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold',
+        isOk
+          ? 'border-success/30 bg-success-soft text-success'
+          : 'border-danger/30 bg-danger-soft text-danger',
+      ]}
+    >
+      <span
+        aria-hidden="true"
+        class:list={[
+          'inline-block size-2 rounded-full',
+          isOk ? 'bg-success' : 'bg-danger',
+        ]}
+      ></span>
+      <span>{apiStatusText}</span>
+    </span>
+  </div>
+
+  <dl class="mt-4 grid grid-cols-1 gap-4 text-sm sm:grid-cols-3">
+    <div class="rounded-lg border border-border/70 bg-surface p-3">
+      <dt class="font-medium text-ink-muted">{es.health.apiLabel}</dt>
+      <dd class="mt-1 font-semibold text-ink">
+        {health?.service ?? 'restaurant-gardylafquen-api'}
+      </dd>
+    </div>
+
+    <div class="rounded-lg border border-border/70 bg-surface p-3">
+      <dt class="font-medium text-ink-muted">{es.health.databaseLabel}</dt>
+      <dd class="mt-1 font-semibold text-ink">{dbStatusText}</dd>
+    </div>
+
+    <div class="rounded-lg border border-border/70 bg-surface p-3">
+      <dt class="font-medium text-ink-muted">{es.health.timestampLabel}</dt>
+      <dd class="mt-1 font-mono text-xs text-ink">
+        {health?.timestamp ?? '—'}
+      </dd>
+    </div>
+  </dl>
+</section>

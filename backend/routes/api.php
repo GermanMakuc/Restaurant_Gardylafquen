@@ -1,0 +1,25 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Http\Controllers\Api\V1\HealthController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+|
+| Versioned REST API routes (/api/v1/...). Legacy web routes remain in
+| the repository root until Phase 4.
+|
+*/
+
+Route::prefix('v1')->group(function (): void {
+    Route::get('/health', [HealthController::class, 'show']);
+
+    Route::middleware('auth:api')->get('/user', function (Request $request) {
+        return $request->user();
+    });
+});

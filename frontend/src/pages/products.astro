@@ -1,0 +1,51 @@
+---
+import ProductsManager from '../features/products/ProductsManager.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { listCategories } from '../lib/api/categories';
+import { listProducts } from '../lib/api/products';
+import { es } from '../lib/i18n/es';
+import type { PaginatedResponse } from '../types/api';
+import type { Category } from '../types/category';
+import type { Product } from '../types/product';
+
+const searchQuery = Astro.url.searchParams.get('q') ?? '';
+const rawCategory = Number(Astro.url.searchParams.get('category') ?? '');
+const selectedCategoryId =
+  Number.isInteger(rawCategory) && rawCategory > 0 ? rawCategory : null;
+const rawPage = Number(Astro.url.searchParams.get('page') ?? '1');
+const currentPage = Number.isInteger(rawPage) && rawPage > 0 ? rawPage : 1;
+
+let result: PaginatedResponse<Product> | null = null;
+let categories: Category[] = [];
+let loadFailed = false;
+
+try {
+  const [productsRes, categoriesRes] = await Promise.all([
+    listProducts({
+      name: searchQuery,
+      ...(selectedCategoryId !== null
+        ? { categoryId: selectedCategoryId }
+        : {}),
+      sort: '-created_at',
+      page: currentPage,
+      perPage: 15,
+    }),
+    listCategories({ sort: 'name', perPage: 100 }),
+  ]);
+
+  result = productsRes;
+  categories = categoriesRes.data;
+} catch {
+  loadFailed = true;
+}
+---
+
+<BaseLayout title={es.products.pageTitle}>
+  <ProductsManager
+    result={result}
+    categories={categories}
+    searchQuery={searchQuery}
+    selectedCategoryId={selectedCategoryId}
+    loadFailed={loadFailed}
+  />
+</BaseLayout>

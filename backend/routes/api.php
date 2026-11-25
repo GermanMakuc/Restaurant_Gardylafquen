@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\HealthController;
+use App\Http\Controllers\Api\V1\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +23,8 @@ Route::prefix('v1')->group(function (): void {
     Route::get('/health', [HealthController::class, 'show']);
 
     Route::apiResource('categories', CategoryController::class);
+    Route::apiResource('products', ProductController::class);
+    Route::post('/products/{product}/image', [ProductController::class, 'uploadImage']);
 
     Route::middleware('auth:api')->get('/user', function (Request $request) {
         return $request->user();

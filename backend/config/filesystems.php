@@ -15,6 +15,8 @@ return [
 
     'default' => env('FILESYSTEM_DRIVER', 'local'),
 
+    'product_images_disk' => env('PRODUCT_IMAGES_DISK', 'public'),
+
     /*
     |--------------------------------------------------------------------------
     | Default Cloud Filesystem Disk

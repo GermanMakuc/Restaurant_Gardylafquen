@@ -8,15 +8,13 @@ Aplicación para gestión de productos, categorías, órdenes/mesas, meseros y c
 
 | Capa | Tecnología |
 |---|---|
-| Backend | **Objetivo:** Laravel última versión estable + PHP 8.3+. **Hoy:** Laravel 5.7 + PHP 7.4 (ver §13). **API REST pura** (JSON) |
+| Backend | Laravel 12 + PHP 8.3+ — **API REST pura** (JSON) |
 | Base de datos | MySQL 8 |
-| Autenticación | **Objetivo:** Laravel Sanctum (tokens). **Hoy:** no disponible en 5.7 (ver §13) |
+| Autenticación | Laravel Sanctum (tokens Bearer) |
 | Frontend | Astro + TypeScript estricto + Tailwind CSS, islas interactivas solo donde haga falta |
 | Infra local | Docker Compose (`backend`, `frontend`, `db`) |
 
-> **Estado actual:** el código en la raíz (`app/`, `resources/`, `routes/`, ...) es el **legado** Laravel 5.7 con vistas Blade. Se migra por fases a `backend/` y `frontend/`. No se agregan funcionalidades nuevas al legado.
->
-> **Escalado previsto:** la arquitectura de este documento es la definitiva. Se implementa **primero sobre Laravel 5.7 / PHP 7.4** y se sube después a la última versión de Laravel. Todo código nuevo debe escribirse **listo para esa actualización** (§13).
+> **Estado actual:** migración completada al monorepo (`backend/` sobre Laravel 12 / PHP 8.3 con Sanctum + `frontend/` sobre Astro SSR + Tailwind CSS). El código legado de Laravel 5.7 fue retirado en la Fase 4.
 
 ## 2. Estructura del monorepo
 
@@ -196,11 +194,11 @@ final class ProductController extends Controller
 ## 11. Plan de migración (por fases)
 
 1. **Fase 0** — Esta regla aprobada. ✅ *(este documento)*
-2. **Fase 1** — Scaffolding: `backend/` (Laravel 5.7 actual movido tal cual + estructura de capas), `frontend/` (Astro + Tailwind), Docker Compose del monorepo, CI de lint/tests.
-3. **Fase 2** — Migrar por dominio, uno por PR: Categorías → Productos → Meseros/Mesas → Órdenes → Ventas/Tickets. Cada uno con migración, DTOs, Repository, Service, Controller, Resource, tests y pantalla Astro.
-4. **Fase 3** — Autenticación: solución provisional compatible con 5.7 (§13) y roles/permisos.
-5. **Fase 4** — Retirar el código legado de la raíz.
-6. **Fase 5** — **Actualizar Laravel a la última versión** (y PHP 8.3+), adoptar la sintaxis objetivo, cambiar a Sanctum, Pint y Larastan. Se hace en un PR propio, sin mezclar funcionalidades.
+2. **Fase 1** — Scaffolding: `backend/`, `frontend/`, Docker Compose del monorepo y CI de lint/tests. ✅
+3. **Fase 2** — Migración por dominio (Categorías → Productos → Meseros/Mesas → Órdenes → Ventas/Tickets) con migraciones, DTOs, Repository, Service, Controller, Resource, tests, OpenAPI y pantallas Astro. ✅
+4. **Fase 3** — Autenticación, roles (`admin`, `cashier`, `waiter`), Policies y sesión Astro mediante cookies `httpOnly` + proxy BFF. ✅
+5. **Fase 4** — Retiro completo del código legado de la raíz. ✅
+6. **Fase 5** — Actualización a Laravel 12 + PHP 8.3+, sintaxis objetivo (`final readonly` DTOs, `enum`, `match`, constructor promovido), Sanctum, Pint y Larastan nivel 8. ✅
 
 ## 12. Instrucciones para agentes de IA
 
@@ -210,43 +208,13 @@ final class ProductController extends Controller
 - Verificar con lint, análisis estático y tests antes de dar una tarea por terminada.
 - Ante ambigüedad de negocio, **preguntar** en lugar de asumir.
 
-## 13. Compatibilidad actual (Laravel 5.7 / PHP 7.4) y camino de actualización
+## 13. Convenciones activas del stack actualizado (Laravel 12 / PHP 8.3+)
 
-El objetivo es actualizar a la última versión de Laravel. Hasta entonces el código nuevo debe **funcionar en 5.7/PHP 7.4 y migrar sin reescribirse**.
+Las equivalencias temporales de Laravel 5.7 / PHP 7.4 fueron completadas en la Fase 5. Todo código nuevo debe usar directamente la sintaxis y herramientas objetivo:
 
-### 13.1 Reglas para que la actualización sea trivial
-
-- La arquitectura por capas (§3), la API REST (§4) y las convenciones de BD (§5) **no cambian** con la actualización; se aplican desde ya.
-- **Prohibido** usar APIs de 5.7 que se eliminaron o cambiaron: helpers `array_*`/`str_*` globales (usar `Arr::`/`Str::`), `Route::get('x', 'Controller@method')` (usar `[Controller::class, 'method']`), `$dates` en modelos (usar `$casts`), `App\Model` en la raíz de `app/` (los modelos van en `app/Models/`), `mix`/webpack en el backend.
-- Inyección de dependencias por constructor y bindings en `RepositoryServiceProvider`; sin facades en Services/Repositories (excepto `DB::transaction`).
-- Lógica de negocio solo en Services: el framework queda en los bordes y se sustituye al actualizar sin tocar el dominio.
-- Dependencias del `composer.json` con versiones acotadas; no añadir paquetes que no soporten la última versión de Laravel.
-- Tests de Feature/Unit desde la Fase 1: son la red de seguridad de la actualización.
-
-### 13.2 Equivalencias de sintaxis (hoy → objetivo)
-
-| Tema | Hoy (PHP 7.4) | Objetivo (PHP 8.3) |
-|---|---|---|
-| DTO | clase `final` con propiedades tipadas `private` + getters, constructor explícito | `final readonly` con constructor promovido |
-| Enums | clase `final` con constantes (`OrderStatus::WAITING`) y método `values()` | `enum OrderStatus: string` |
-| Tipos | `?string`, tipos de retorno siempre; sin union types | union types, `never`, `new` en inicializadores |
-| `match` / `str_contains` | no disponibles: usar `switch` / `Str::contains` | `match`, funciones nativas |
-| Strict types | `declare(strict_types=1);` siempre | igual |
-
-Al actualizar se hace una pasada mecánica (Rector) de la columna «Hoy» a «Objetivo».
-
-### 13.3 Autenticación
-
-- Sanctum **no existe** en Laravel 5.7. Hasta la Fase 5 se usa el guard `api` con `token` (`api_token` hasheado en `users`) o Passport, el que sea más simple de reemplazar.
-- El acceso al token se encapsula en un `AuthService` + `AuthRepositoryInterface`; los controllers no conocen el mecanismo. Al actualizar solo cambia la implementación (a Sanctum) y el middleware `auth:sanctum`.
-- El contrato de la API (`POST /api/v1/auth/login` → `{ "data": { "token": "..." } }`, `POST /api/v1/auth/logout`) **no cambia** con la actualización.
-
-### 13.4 Herramientas de calidad hoy
-
-- Pint y Larastan nivel 8 requieren PHP/Laravel modernos: hasta la Fase 5 se usa **PHP‑CS‑Fixer (PSR‑12)** y **PHPStan** al nivel más alto que soporte el proyecto, subiéndolo gradualmente.
-- Las reglas de §8 (lint + análisis estático + tests en verde) se mantienen igualmente.
-- `Model::preventLazyLoading()` (§5) no existe en 5.7: se evita el N+1 con `with()` en los repositorios y se revisa en code review.
-
-### 13.5 Docker
-
-- La imagen de `backend` usa PHP 7.4 hoy; la actualización a PHP 8.3 es un cambio de la imagen base en la Fase 5. No se acopla código a la versión de PHP del contenedor.
+- **DTOs:** `final readonly class` con propiedades públicas promovidas en `__construct` y normalización de entrada en `fromArray()`.
+- **Enums:** enums nativos respaldados por `string` (`enum OrderStatus: string`, `TableStatus`, `UserRole`) con `values(): array`.
+- **Services, Controllers y Repositories:** `final` / `final readonly` con promoción de constructor `private readonly`, `declare(strict_types=1);`, `match` y funciones nativas (`str_contains`, `str_starts_with`).
+- **Autenticación:** Laravel Sanctum (`HasApiTokens` en `User`, middleware `auth:sanctum`, encapsulado en `AuthService` + `AuthRepositoryInterface`).
+- **Calidad y BD:** `./vendor/bin/pint --test` (preset PSR-12 en `pint.json`), `./vendor/bin/phpstan analyse` (Larastan nivel 8), `./vendor/bin/phpunit` (PHPUnit 11 sobre SQLite `:memory:` con `<server>` + `<env force="true">` en `phpunit.xml`) y `Model::preventLazyLoading(! $this->app->isProduction())` activo en `AppServiceProvider`.
+- **Docker:** imagen `backend` sobre `php:8.3-apache`.

@@ -16,11 +16,9 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 final class WaiterController extends Controller
 {
-    private WaiterService $service;
-
-    public function __construct(WaiterService $service)
-    {
-        $this->service = $service;
+    public function __construct(
+        private readonly WaiterService $service,
+    ) {
     }
 
     public function index(ListWaitersRequest $request): AnonymousResourceCollection

@@ -11,11 +11,9 @@ use Illuminate\Http\JsonResponse;
 
 final class HealthController extends Controller
 {
-    private HealthService $service;
-
-    public function __construct(HealthService $service)
-    {
-        $this->service = $service;
+    public function __construct(
+        private readonly HealthService $service,
+    ) {
     }
 
     public function show(): JsonResponse

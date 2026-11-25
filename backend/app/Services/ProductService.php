@@ -16,35 +16,21 @@ use App\Repositories\Contracts\ProductRepositoryInterface;
 use Illuminate\Contracts\Filesystem\Factory as FilesystemFactory;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
-use Intervention\Image\Constraint;
-use Intervention\Image\ImageManager;
+use RuntimeException;
 
 final class ProductService
 {
-    private ProductRepositoryInterface $products;
-
-    private CategoryRepositoryInterface $categories;
-
-    private FilesystemFactory $filesystems;
-
-    private ImageManager $images;
-
-    private string $imageDisk;
-
     public function __construct(
-        ProductRepositoryInterface $products,
-        CategoryRepositoryInterface $categories,
-        FilesystemFactory $filesystems,
-        ImageManager $images,
-        string $imageDisk = 'public'
+        private readonly ProductRepositoryInterface $products,
+        private readonly CategoryRepositoryInterface $categories,
+        private readonly FilesystemFactory $filesystems,
+        private readonly string $imageDisk = 'public',
     ) {
-        $this->products = $products;
-        $this->categories = $categories;
-        $this->filesystems = $filesystems;
-        $this->images = $images;
-        $this->imageDisk = $imageDisk;
     }
 
+    /**
+     * @return LengthAwarePaginator<int, Product>
+     */
     public function list(ListProductsDto $dto): LengthAwarePaginator
     {
         return $this->products->paginate($dto);
@@ -86,13 +72,10 @@ final class ProductService
         $product = $this->findOrFail($id);
         $disk = $this->filesystems->disk($this->imageDisk);
 
-        $image = $this->images->make($dto->image()->getRealPath());
-        $image->fit(400, 400, static function (Constraint $constraint): void {
-            $constraint->upsize();
-        });
+        $encoded = $this->renderSquareJpeg($dto->image()->getRealPath());
 
         $newPath = 'products/' . $product->id . '-' . Str::random(20) . '.jpg';
-        $disk->put($newPath, (string) $image->encode('jpg', 90));
+        $disk->put($newPath, $encoded);
 
         $oldPath = $product->image_path;
         $updated = $this->products->updateImagePath($product, $newPath);
@@ -109,5 +92,51 @@ final class ProductService
         $product = $this->findOrFail($id);
 
         $this->products->delete($product);
+    }
+
+    private function renderSquareJpeg(string|false $realPath, int $size = 400): string
+    {
+        if ($realPath === false) {
+            throw new RuntimeException('No se pudo localizar la imagen subida.');
+        }
+
+        $raw = file_get_contents($realPath);
+        if ($raw === false) {
+            throw new RuntimeException('No se pudo leer la imagen subida.');
+        }
+
+        $src = imagecreatefromstring($raw);
+        if ($src === false) {
+            throw new RuntimeException('Formato de imagen no soportado.');
+        }
+
+        $srcWidth = imagesx($src);
+        $srcHeight = imagesy($src);
+        $cropSize = max(1, min($srcWidth, $srcHeight));
+        $targetSize = max(1, min($cropSize, max(1, $size)));
+        $srcX = intdiv($srcWidth - $cropSize, 2);
+        $srcY = intdiv($srcHeight - $cropSize, 2);
+
+        $dst = imagecreatetruecolor($targetSize, $targetSize);
+        if ($dst === false) {
+            imagedestroy($src);
+            throw new RuntimeException('No se pudo inicializar el lienzo de imagen.');
+        }
+
+        $white = imagecolorallocate($dst, 255, 255, 255);
+        if ($white !== false) {
+            imagefill($dst, 0, 0, $white);
+        }
+
+        imagecopyresampled($dst, $src, 0, 0, $srcX, $srcY, $targetSize, $targetSize, $cropSize, $cropSize);
+
+        ob_start();
+        imagejpeg($dst, null, 90);
+        $encoded = (string) ob_get_clean();
+
+        imagedestroy($src);
+        imagedestroy($dst);
+
+        return $encoded;
     }
 }

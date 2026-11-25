@@ -8,7 +8,7 @@ on:
 
 jobs:
   backend:
-    name: Backend (PHP 7.4 / Laravel 5.7)
+    name: Backend (PHP 8.3 / Laravel 12)
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -19,7 +19,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "7.4"
+          php-version: "8.3"
           extensions: mbstring, pdo_mysql, pdo_sqlite, sqlite3, exif, bcmath, gd, zip
           tools: composer:v2
 
@@ -31,10 +31,10 @@ jobs:
           cp .env.example .env
           php artisan key:generate --force
 
-      - name: Check code style (PHP-CS-Fixer)
-        run: ./vendor/bin/php-cs-fixer fix --dry-run --diff
+      - name: Check code style (Laravel Pint)
+        run: ./vendor/bin/pint --test
 
-      - name: Static analysis (PHPStan)
+      - name: Static analysis (Larastan)
         run: ./vendor/bin/phpstan analyse --no-progress --memory-limit=512M
 
       - name: Run tests (PHPUnit)

@@ -10,11 +10,9 @@ use Throwable;
 
 final class HealthService
 {
-    private ConnectionInterface $db;
-
-    public function __construct(ConnectionInterface $db)
-    {
-        $this->db = $db;
+    public function __construct(
+        private readonly ConnectionInterface $db,
+    ) {
     }
 
     public function check(): HealthStatusDto

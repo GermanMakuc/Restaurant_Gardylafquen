@@ -67,12 +67,12 @@ final class SaleServiceTest extends TestCase
         $order = new Order([
             'table_id' => 3,
             'waiter_id' => 1,
-            'status' => OrderStatus::SERVED,
+            'status' => OrderStatus::SERVED->value,
             'subtotal_cents' => 1000000,
         ]);
         $order->id = 7;
 
-        $table = new Table(['number' => 3, 'status' => TableStatus::OCCUPIED]);
+        $table = new Table(['number' => 3, 'status' => TableStatus::OCCUPIED->value]);
         $table->id = 3;
 
         $sale = new Sale([
@@ -95,12 +95,12 @@ final class SaleServiceTest extends TestCase
         /** @var OrderRepositoryInterface&MockObject $orders */
         $orders = $this->createMock(OrderRepositoryInterface::class);
         $orders->expects($this->once())->method('findById')->with(7)->willReturn($order);
-        $orders->expects($this->once())->method('updateStatus')->with($order, OrderStatus::PAID)->willReturn($order);
+        $orders->expects($this->once())->method('updateStatus')->with($order, OrderStatus::PAID->value)->willReturn($order);
 
         /** @var TableRepositoryInterface&MockObject $tables */
         $tables = $this->createMock(TableRepositoryInterface::class);
         $tables->expects($this->once())->method('findById')->with(3)->willReturn($table);
-        $tables->expects($this->once())->method('updateStatus')->with($table, TableStatus::AVAILABLE)->willReturn($table);
+        $tables->expects($this->once())->method('updateStatus')->with($table, TableStatus::AVAILABLE->value)->willReturn($table);
 
         DB::shouldReceive('transaction')->once()->andReturnUsing(static function (callable $callback) {
             return $callback();
@@ -130,7 +130,7 @@ final class SaleServiceTest extends TestCase
 
     public function test_create_throws_when_order_is_already_paid(): void
     {
-        $order = new Order(['table_id' => 3, 'status' => OrderStatus::PAID, 'subtotal_cents' => 500000]);
+        $order = new Order(['table_id' => 3, 'status' => OrderStatus::PAID->value, 'subtotal_cents' => 500000]);
         $order->id = 7;
 
         /** @var SaleRepositoryInterface&MockObject $sales */
@@ -149,7 +149,7 @@ final class SaleServiceTest extends TestCase
 
     public function test_create_throws_when_order_is_cancelled(): void
     {
-        $order = new Order(['table_id' => 3, 'status' => OrderStatus::CANCELLED, 'subtotal_cents' => 500000]);
+        $order = new Order(['table_id' => 3, 'status' => OrderStatus::CANCELLED->value, 'subtotal_cents' => 500000]);
         $order->id = 7;
 
         /** @var SaleRepositoryInterface&MockObject $sales */

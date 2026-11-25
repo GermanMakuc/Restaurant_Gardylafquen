@@ -27,7 +27,7 @@ final class HealthServiceTest extends TestCase
         $this->assertSame('ok', $status->status());
         $this->assertSame('ok', $status->database());
         $this->assertSame('restaurant-gardylafquen-api', $status->service());
-        $this->assertRegExp('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/', $status->timestamp());
+        $this->assertMatchesRegularExpression('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/', $status->timestamp());
     }
 
     public function test_it_returns_degraded_when_database_query_fails(): void

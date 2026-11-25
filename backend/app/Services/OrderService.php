@@ -31,26 +31,17 @@ use Illuminate\Support\Facades\DB;
 
 final class OrderService
 {
-    private OrderRepositoryInterface $orders;
-
-    private TableRepositoryInterface $tables;
-
-    private WaiterRepositoryInterface $waiters;
-
-    private ProductRepositoryInterface $products;
-
     public function __construct(
-        OrderRepositoryInterface $orders,
-        TableRepositoryInterface $tables,
-        WaiterRepositoryInterface $waiters,
-        ProductRepositoryInterface $products
+        private readonly OrderRepositoryInterface $orders,
+        private readonly TableRepositoryInterface $tables,
+        private readonly WaiterRepositoryInterface $waiters,
+        private readonly ProductRepositoryInterface $products,
     ) {
-        $this->orders = $orders;
-        $this->tables = $tables;
-        $this->waiters = $waiters;
-        $this->products = $products;
     }
 
+    /**
+     * @return LengthAwarePaginator<int, Order>
+     */
     public function list(ListOrdersDto $dto): LengthAwarePaginator
     {
         return $this->orders->paginate($dto);
@@ -78,13 +69,13 @@ final class OrderService
             $order = $this->orders->createWithItems(
                 $dto->tableId(),
                 $dto->waiterId(),
-                OrderStatus::WAITING,
+                OrderStatus::WAITING->value,
                 $dto->notes(),
                 $resolved['subtotalCents'],
                 $resolved['items']
             );
 
-            $this->tables->updateStatus($table, TableStatus::OCCUPIED);
+            $this->tables->updateStatus($table, TableStatus::OCCUPIED->value);
 
             return $order;
         });
@@ -119,9 +110,9 @@ final class OrderService
             if ($previousTableId !== $dto->tableId()) {
                 $previousTable = $this->tables->findById($previousTableId);
                 if ($previousTable !== null) {
-                    $this->tables->updateStatus($previousTable, TableStatus::AVAILABLE);
+                    $this->tables->updateStatus($previousTable, TableStatus::AVAILABLE->value);
                 }
-                $this->tables->updateStatus($targetTable, TableStatus::OCCUPIED);
+                $this->tables->updateStatus($targetTable, TableStatus::OCCUPIED->value);
             }
 
             return $saved;
@@ -139,15 +130,11 @@ final class OrderService
             return $order;
         }
 
-        $allowedTargets = [];
-        switch ($order->status) {
-            case OrderStatus::WAITING:
-                $allowedTargets = [OrderStatus::SERVED, OrderStatus::CANCELLED];
-                break;
-            case OrderStatus::SERVED:
-                $allowedTargets = [OrderStatus::WAITING, OrderStatus::CANCELLED];
-                break;
-        }
+        $allowedTargets = match ($order->status) {
+            OrderStatus::WAITING->value => [OrderStatus::SERVED->value, OrderStatus::CANCELLED->value],
+            OrderStatus::SERVED->value => [OrderStatus::WAITING->value, OrderStatus::CANCELLED->value],
+            default => [],
+        };
 
         if (!in_array($targetStatus, $allowedTargets, true)) {
             throw new InvalidOrderStatusTransitionException($order->status, $targetStatus);
@@ -157,10 +144,10 @@ final class OrderService
         $updated = DB::transaction(function () use ($order, $targetStatus): Order {
             $saved = $this->orders->updateStatus($order, $targetStatus);
 
-            if ($targetStatus === OrderStatus::CANCELLED) {
+            if ($targetStatus === OrderStatus::CANCELLED->value) {
                 $table = $this->tables->findById((int) $order->table_id);
                 if ($table !== null) {
-                    $this->tables->updateStatus($table, TableStatus::AVAILABLE);
+                    $this->tables->updateStatus($table, TableStatus::AVAILABLE->value);
                 }
             }
 
@@ -174,7 +161,7 @@ final class OrderService
     {
         $order = $this->findOrFail($id);
 
-        if ($order->status === OrderStatus::PAID) {
+        if ($order->status === OrderStatus::PAID->value) {
             throw new OrderNotEditableException($id, $order->status);
         }
 
@@ -187,7 +174,7 @@ final class OrderService
             if ($wasActive) {
                 $table = $this->tables->findById($tableId);
                 if ($table !== null) {
-                    $this->tables->updateStatus($table, TableStatus::AVAILABLE);
+                    $this->tables->updateStatus($table, TableStatus::AVAILABLE->value);
                 }
             }
         });
@@ -206,7 +193,7 @@ final class OrderService
 
         $isSameTable = $currentOrderTableId !== null && $currentOrderTableId === $tableId;
 
-        if (!$isSameTable && $table->status === TableStatus::INACTIVE) {
+        if (!$isSameTable && $table->status === TableStatus::INACTIVE->value) {
             throw new TableAlreadyOccupiedException((int) $table->number);
         }
 

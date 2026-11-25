@@ -12,6 +12,9 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface TableRepositoryInterface
 {
+    /**
+     * @return LengthAwarePaginator<int, Table>
+     */
     public function paginate(ListTablesDto $dto): LengthAwarePaginator;
 
     public function findById(int $id): ?Table;

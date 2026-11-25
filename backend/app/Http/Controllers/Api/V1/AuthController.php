@@ -15,11 +15,9 @@ use Illuminate\Http\Request;
 
 final class AuthController extends Controller
 {
-    private AuthService $service;
-
-    public function __construct(AuthService $service)
-    {
-        $this->service = $service;
+    public function __construct(
+        private readonly AuthService $service,
+    ) {
     }
 
     public function login(LoginRequest $request): AuthTokenResource

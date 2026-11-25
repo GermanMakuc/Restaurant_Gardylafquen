@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace Database\Seeders;
+
 use App\DTOs\Order\CreateOrderDto;
 use App\DTOs\Order\OrderItemInputDto;
 use App\Enums\TableStatus;
@@ -14,11 +16,8 @@ use Illuminate\Database\Seeder;
 
 class OrderSeeder extends Seeder
 {
-    private OrderService $orders;
-
-    public function __construct(OrderService $orders)
+    public function __construct(private readonly OrderService $orders)
     {
-        $this->orders = $orders;
     }
 
     public function run(): void
@@ -28,7 +27,7 @@ class OrderSeeder extends Seeder
         }
 
         /** @var Table|null $table */
-        $table = Table::query()->where('status', TableStatus::AVAILABLE)->orderBy('number')->first();
+        $table = Table::query()->where('status', TableStatus::AVAILABLE->value)->orderBy('number')->first();
         /** @var Waiter|null $waiter */
         $waiter = Waiter::query()->where('is_active', true)->first();
         $products = Product::query()->limit(2)->get();

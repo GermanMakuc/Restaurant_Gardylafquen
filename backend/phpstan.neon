@@ -1,7 +1,9 @@
+includes:
+  - vendor/larastan/larastan/extension.neon
+
 parameters:
   level: 8
   paths:
-    - app/Auth
     - app/DTOs
     - app/Enums
     - app/Exceptions

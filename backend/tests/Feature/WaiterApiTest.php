@@ -20,9 +20,9 @@ final class WaiterApiTest extends TestCase
 
     public function test_index_returns_paginated_waiters_with_filters(): void
     {
-        factory(Waiter::class)->create(['name' => 'Camila Rojas', 'is_active' => true]);
-        factory(Waiter::class)->create(['name' => 'Camila Vega', 'is_active' => false]);
-        factory(Waiter::class)->create(['name' => 'Mateo Silva', 'is_active' => true]);
+        Waiter::factory()->create(['name' => 'Camila Rojas', 'is_active' => true]);
+        Waiter::factory()->create(['name' => 'Camila Vega', 'is_active' => false]);
+        Waiter::factory()->create(['name' => 'Mateo Silva', 'is_active' => true]);
 
         $response = $this->getJson('/api/v1/waiters?filter[name]=Camila&filter[is_active]=true&sort=name');
 
@@ -69,7 +69,7 @@ final class WaiterApiTest extends TestCase
     public function test_show_update_and_soft_delete_waiter(): void
     {
         /** @var Waiter $waiter */
-        $waiter = factory(Waiter::class)->create(['name' => 'Lucas', 'email' => 'lucas@example.test']);
+        $waiter = Waiter::factory()->create(['name' => 'Lucas', 'email' => 'lucas@example.test']);
 
         $this->getJson('/api/v1/waiters/' . $waiter->id)
             ->assertStatus(200)

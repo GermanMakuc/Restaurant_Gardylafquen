@@ -5,14 +5,12 @@ COPY composer.json composer.lock ./
 RUN composer install --no-scripts --no-autoloader --no-interaction --prefer-dist --ignore-platform-reqs
 
 # ---- Imagen de la aplicación ----
-# Laravel 5.7 requiere PHP 7.1.3+ (PHP 7.4 hoy; actualización a 8.3 en Fase 5)
-FROM php:7.4-apache
+FROM php:8.3-apache
 
-RUN sed -i 's|deb.debian.org|archive.debian.org|g; s|security.debian.org|archive.debian.org|g' /etc/apt/sources.list 2>/dev/null || true \
-    && apt-get update && apt-get install -y --no-install-recommends \
-        libpng-dev libjpeg-dev libfreetype6-dev libzip-dev libonig-dev unzip git \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        libpng-dev libjpeg-dev libfreetype6-dev libzip-dev libonig-dev libsqlite3-dev unzip git \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j"$(nproc)" pdo_mysql mbstring exif bcmath gd zip \
+    && docker-php-ext-install -j"$(nproc)" pdo_mysql pdo_sqlite mbstring exif bcmath gd zip \
     && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
 

@@ -30,14 +30,14 @@ final class OrderServiceTest extends TestCase
 {
     public function test_create_aggregates_items_calculates_subtotal_and_marks_table_occupied(): void
     {
-        $table = new Table(['number' => 1, 'status' => TableStatus::AVAILABLE]);
+        $table = new Table(['number' => 1, 'status' => TableStatus::AVAILABLE->value]);
         $table->id = 1;
         $waiter = new Waiter(['name' => 'Camila', 'is_active' => true]);
         $waiter->id = 2;
         $product = new Product(['name' => 'Empanada', 'price_cents' => 350000]);
         $product->id = 10;
 
-        $createdOrder = new Order(['table_id' => 1, 'waiter_id' => 2, 'status' => OrderStatus::WAITING, 'subtotal_cents' => 1050000]);
+        $createdOrder = new Order(['table_id' => 1, 'waiter_id' => 2, 'status' => OrderStatus::WAITING->value, 'subtotal_cents' => 1050000]);
         $createdOrder->id = 5;
 
         /** @var OrderRepositoryInterface&MockObject $orders */
@@ -48,7 +48,7 @@ final class OrderServiceTest extends TestCase
             ->with(
                 1,
                 2,
-                OrderStatus::WAITING,
+                OrderStatus::WAITING->value,
                 'Mesa junto a ventana',
                 1050000,
                 $this->callback(static function (array $items): bool {
@@ -62,7 +62,7 @@ final class OrderServiceTest extends TestCase
         /** @var TableRepositoryInterface&MockObject $tables */
         $tables = $this->createMock(TableRepositoryInterface::class);
         $tables->expects($this->once())->method('findById')->with(1)->willReturn($table);
-        $tables->expects($this->once())->method('updateStatus')->with($table, TableStatus::OCCUPIED)->willReturn($table);
+        $tables->expects($this->once())->method('updateStatus')->with($table, TableStatus::OCCUPIED->value)->willReturn($table);
 
         /** @var WaiterRepositoryInterface&MockObject $waiters */
         $waiters = $this->createMock(WaiterRepositoryInterface::class);
@@ -87,7 +87,7 @@ final class OrderServiceTest extends TestCase
 
     public function test_create_throws_when_table_already_has_active_order(): void
     {
-        $table = new Table(['number' => 4, 'status' => TableStatus::OCCUPIED]);
+        $table = new Table(['number' => 4, 'status' => TableStatus::OCCUPIED->value]);
         $table->id = 4;
 
         /** @var OrderRepositoryInterface&MockObject $orders */
@@ -111,7 +111,7 @@ final class OrderServiceTest extends TestCase
 
     public function test_create_throws_when_waiter_is_inactive(): void
     {
-        $table = new Table(['number' => 2, 'status' => TableStatus::AVAILABLE]);
+        $table = new Table(['number' => 2, 'status' => TableStatus::AVAILABLE->value]);
         $table->id = 2;
         $waiter = new Waiter(['name' => 'Inactivo', 'is_active' => false]);
         $waiter->id = 3;
@@ -139,22 +139,22 @@ final class OrderServiceTest extends TestCase
 
     public function test_update_status_to_cancelled_frees_table(): void
     {
-        $order = new Order(['table_id' => 6, 'waiter_id' => 1, 'status' => OrderStatus::WAITING]);
+        $order = new Order(['table_id' => 6, 'waiter_id' => 1, 'status' => OrderStatus::WAITING->value]);
         $order->id = 9;
-        $cancelled = new Order(['table_id' => 6, 'waiter_id' => 1, 'status' => OrderStatus::CANCELLED]);
+        $cancelled = new Order(['table_id' => 6, 'waiter_id' => 1, 'status' => OrderStatus::CANCELLED->value]);
         $cancelled->id = 9;
-        $table = new Table(['number' => 6, 'status' => TableStatus::OCCUPIED]);
+        $table = new Table(['number' => 6, 'status' => TableStatus::OCCUPIED->value]);
         $table->id = 6;
 
         /** @var OrderRepositoryInterface&MockObject $orders */
         $orders = $this->createMock(OrderRepositoryInterface::class);
         $orders->expects($this->once())->method('findById')->with(9)->willReturn($order);
-        $orders->expects($this->once())->method('updateStatus')->with($order, OrderStatus::CANCELLED)->willReturn($cancelled);
+        $orders->expects($this->once())->method('updateStatus')->with($order, OrderStatus::CANCELLED->value)->willReturn($cancelled);
 
         /** @var TableRepositoryInterface&MockObject $tables */
         $tables = $this->createMock(TableRepositoryInterface::class);
         $tables->expects($this->once())->method('findById')->with(6)->willReturn($table);
-        $tables->expects($this->once())->method('updateStatus')->with($table, TableStatus::AVAILABLE)->willReturn($table);
+        $tables->expects($this->once())->method('updateStatus')->with($table, TableStatus::AVAILABLE->value)->willReturn($table);
 
         /** @var WaiterRepositoryInterface&MockObject $waiters */
         $waiters = $this->createMock(WaiterRepositoryInterface::class);
@@ -166,14 +166,14 @@ final class OrderServiceTest extends TestCase
         });
 
         $service = new OrderService($orders, $tables, $waiters, $products);
-        $result = $service->updateStatus(9, new UpdateOrderStatusDto(OrderStatus::CANCELLED));
+        $result = $service->updateStatus(9, new UpdateOrderStatusDto(OrderStatus::CANCELLED->value));
 
         $this->assertSame($cancelled, $result);
     }
 
     public function test_update_status_rejects_transition_from_paid(): void
     {
-        $order = new Order(['table_id' => 6, 'waiter_id' => 1, 'status' => OrderStatus::PAID]);
+        $order = new Order(['table_id' => 6, 'waiter_id' => 1, 'status' => OrderStatus::PAID->value]);
         $order->id = 9;
 
         /** @var OrderRepositoryInterface&MockObject $orders */
@@ -190,12 +190,12 @@ final class OrderServiceTest extends TestCase
         $service = new OrderService($orders, $tables, $waiters, $products);
 
         $this->expectException(InvalidOrderStatusTransitionException::class);
-        $service->updateStatus(9, new UpdateOrderStatusDto(OrderStatus::WAITING));
+        $service->updateStatus(9, new UpdateOrderStatusDto(OrderStatus::WAITING->value));
     }
 
     public function test_delete_rejects_paid_order(): void
     {
-        $order = new Order(['table_id' => 6, 'waiter_id' => 1, 'status' => OrderStatus::PAID]);
+        $order = new Order(['table_id' => 6, 'waiter_id' => 1, 'status' => OrderStatus::PAID->value]);
         $order->id = 9;
 
         /** @var OrderRepositoryInterface&MockObject $orders */

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Auth\HashedTokenGuard;
 use App\Models\Category;
 use App\Models\Order;
 use App\Models\Product;
@@ -18,8 +17,6 @@ use App\Policies\SalePolicy;
 use App\Policies\TablePolicy;
 use App\Policies\WaiterPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -40,19 +37,5 @@ class AuthServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerPolicies();
-
-        Auth::extend('hashed_token', static function ($app, string $name, array $config): HashedTokenGuard {
-            /** @var Request $request */
-            $request = $app->make('request');
-            $provider = Auth::createUserProvider($config['provider'] ?? 'users');
-            if ($provider === null) {
-                throw new \RuntimeException('User provider is not configured.');
-            }
-
-            $guard = new HashedTokenGuard($provider, $request);
-            $app->refresh('request', $guard, 'setRequest');
-
-            return $guard;
-        });
     }
 }

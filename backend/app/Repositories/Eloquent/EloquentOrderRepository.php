@@ -11,7 +11,7 @@ use App\Models\Order;
 use App\Repositories\Contracts\OrderRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
-final class EloquentOrderRepository implements OrderRepositoryInterface
+final readonly class EloquentOrderRepository implements OrderRepositoryInterface
 {
     /** @var array<string, array{0: string, 1: string}> */
     private const SORT_MAP = [
@@ -23,13 +23,13 @@ final class EloquentOrderRepository implements OrderRepositoryInterface
         '-created_at' => ['created_at', 'desc'],
     ];
 
-    private Order $model;
-
-    public function __construct(Order $model)
+    public function __construct(private Order $model)
     {
-        $this->model = $model;
     }
 
+    /**
+     * @return LengthAwarePaginator<int, Order>
+     */
     public function paginate(ListOrdersDto $dto): LengthAwarePaginator
     {
         $query = $this->model->newQuery()->with(['table', 'waiter', 'items']);

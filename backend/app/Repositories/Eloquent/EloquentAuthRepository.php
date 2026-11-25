@@ -6,15 +6,11 @@ namespace App\Repositories\Eloquent;
 
 use App\Models\User;
 use App\Repositories\Contracts\AuthRepositoryInterface;
-use Illuminate\Support\Str;
 
-final class EloquentAuthRepository implements AuthRepositoryInterface
+final readonly class EloquentAuthRepository implements AuthRepositoryInterface
 {
-    private User $model;
-
-    public function __construct(User $model)
+    public function __construct(private User $model)
     {
-        $this->model = $model;
     }
 
     public function findByEmail(string $email): ?User
@@ -29,16 +25,11 @@ final class EloquentAuthRepository implements AuthRepositoryInterface
 
     public function issueToken(User $user): string
     {
-        $plainToken = Str::random(60);
-        $user->api_token = hash('sha256', $plainToken);
-        $user->save();
-
-        return $plainToken;
+        return $user->createToken('api')->plainTextToken;
     }
 
     public function revokeToken(User $user): void
     {
-        $user->api_token = null;
-        $user->save();
+        $user->currentAccessToken()->delete();
     }
 }

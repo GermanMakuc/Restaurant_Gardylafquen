@@ -11,6 +11,9 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface SaleRepositoryInterface
 {
+    /**
+     * @return LengthAwarePaginator<int, Sale>
+     */
     public function paginate(ListSalesDto $dto): LengthAwarePaginator;
 
     public function summarize(ListSalesDto $dto): SalesSummaryDto;

@@ -21,8 +21,8 @@ final class TableApiTest extends TestCase
 
     public function test_index_returns_paginated_tables_filtered_by_status(): void
     {
-        factory(Table::class)->create(['number' => 2, 'status' => TableStatus::OCCUPIED]);
-        factory(Table::class)->create(['number' => 1, 'status' => TableStatus::AVAILABLE, 'label' => 'Ventana']);
+        Table::factory()->create(['number' => 2, 'status' => TableStatus::OCCUPIED->value]);
+        Table::factory()->create(['number' => 1, 'status' => TableStatus::AVAILABLE->value, 'label' => 'Ventana']);
 
         $response = $this->getJson('/api/v1/tables?filter[status]=available&sort=number');
 
@@ -45,7 +45,7 @@ final class TableApiTest extends TestCase
         $response = $this->postJson('/api/v1/tables', [
             'number' => 12,
             'capacity' => 6,
-            'status' => TableStatus::AVAILABLE,
+            'status' => TableStatus::AVAILABLE->value,
             'label' => 'Terraza',
         ]);
 
@@ -82,7 +82,7 @@ final class TableApiTest extends TestCase
     public function test_show_update_and_soft_delete_table(): void
     {
         /** @var Table $table */
-        $table = factory(Table::class)->create(['number' => 5, 'capacity' => 4]);
+        $table = Table::factory()->create(['number' => 5, 'capacity' => 4]);
 
         $this->getJson('/api/v1/tables/' . $table->id)
             ->assertStatus(200)
@@ -91,7 +91,7 @@ final class TableApiTest extends TestCase
         $this->putJson('/api/v1/tables/' . $table->id, [
             'number' => 5,
             'capacity' => 8,
-            'status' => TableStatus::RESERVED,
+            'status' => TableStatus::RESERVED->value,
             'label' => 'VIP',
         ])
             ->assertStatus(200)

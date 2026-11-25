@@ -21,8 +21,8 @@ final class TableServiceTest extends TestCase
 {
     public function test_list_delegates_to_repository(): void
     {
-        $dto = new ListTablesDto(TableStatus::AVAILABLE, 'number', 20);
-        /** @var LengthAwarePaginator&MockObject $paginator */
+        $dto = new ListTablesDto(TableStatus::AVAILABLE->value, 'number', 20);
+        /** @var LengthAwarePaginator<int, Table>&MockObject $paginator */
         $paginator = $this->createMock(LengthAwarePaginator::class);
 
         /** @var TableRepositoryInterface&MockObject $repository */
@@ -48,8 +48,8 @@ final class TableServiceTest extends TestCase
 
     public function test_create_persists_table_when_number_is_unique(): void
     {
-        $dto = new CreateTableDto(1, 4, TableStatus::AVAILABLE, 'Ventana');
-        $created = new Table(['number' => 1, 'capacity' => 4, 'status' => TableStatus::AVAILABLE, 'label' => 'Ventana']);
+        $dto = new CreateTableDto(1, 4, TableStatus::AVAILABLE->value, 'Ventana');
+        $created = new Table(['number' => 1, 'capacity' => 4, 'status' => TableStatus::AVAILABLE->value, 'label' => 'Ventana']);
         $created->id = 1;
 
         /** @var TableRepositoryInterface&MockObject $repository */
@@ -79,11 +79,11 @@ final class TableServiceTest extends TestCase
 
     public function test_update_modifies_table_when_found_and_number_unique(): void
     {
-        $existing = new Table(['number' => 2, 'capacity' => 4, 'status' => TableStatus::AVAILABLE]);
+        $existing = new Table(['number' => 2, 'capacity' => 4, 'status' => TableStatus::AVAILABLE->value]);
         $existing->id = 2;
-        $updated = new Table(['number' => 2, 'capacity' => 6, 'status' => TableStatus::RESERVED, 'label' => 'Terraza']);
+        $updated = new Table(['number' => 2, 'capacity' => 6, 'status' => TableStatus::RESERVED->value, 'label' => 'Terraza']);
         $updated->id = 2;
-        $dto = new UpdateTableDto(2, 6, TableStatus::RESERVED, 'Terraza');
+        $dto = new UpdateTableDto(2, 6, TableStatus::RESERVED->value, 'Terraza');
 
         /** @var TableRepositoryInterface&MockObject $repository */
         $repository = $this->createMock(TableRepositoryInterface::class);
@@ -98,7 +98,7 @@ final class TableServiceTest extends TestCase
 
     public function test_delete_removes_table(): void
     {
-        $existing = new Table(['number' => 9, 'capacity' => 2, 'status' => TableStatus::AVAILABLE]);
+        $existing = new Table(['number' => 9, 'capacity' => 2, 'status' => TableStatus::AVAILABLE->value]);
         $existing->id = 9;
 
         /** @var TableRepositoryInterface&MockObject $repository */

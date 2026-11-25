@@ -16,11 +16,9 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 final class CategoryController extends Controller
 {
-    private CategoryService $service;
-
-    public function __construct(CategoryService $service)
-    {
-        $this->service = $service;
+    public function __construct(
+        private readonly CategoryService $service,
+    ) {
     }
 
     public function index(ListCategoriesRequest $request): AnonymousResourceCollection

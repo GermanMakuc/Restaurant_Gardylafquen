@@ -26,11 +26,11 @@ final class SaleApiTest extends TestCase
     public function test_store_closes_order_creates_sale_and_frees_table(): void
     {
         /** @var Table $table */
-        $table = factory(Table::class)->create(['number' => 4, 'status' => TableStatus::AVAILABLE]);
+        $table = Table::factory()->create(['number' => 4, 'status' => TableStatus::AVAILABLE->value]);
         /** @var Waiter $waiter */
-        $waiter = factory(Waiter::class)->create(['is_active' => true]);
+        $waiter = Waiter::factory()->create(['is_active' => true]);
         /** @var Product $product */
-        $product = factory(Product::class)->create(['price_cents' => 1000000]);
+        $product = Product::factory()->create(['price_cents' => 1000000]);
 
         $orderRes = $this->postJson('/api/v1/orders', [
             'table_id' => $table->id,
@@ -58,11 +58,11 @@ final class SaleApiTest extends TestCase
 
         $this->assertDatabaseHas('restaurant_orders', [
             'id' => $orderId,
-            'status' => OrderStatus::PAID,
+            'status' => OrderStatus::PAID->value,
         ]);
         $this->assertDatabaseHas('tables', [
             'id' => $table->id,
-            'status' => TableStatus::AVAILABLE,
+            'status' => TableStatus::AVAILABLE->value,
         ]);
 
         $this->postJson('/api/v1/sales', ['order_id' => $orderId])
@@ -72,7 +72,7 @@ final class SaleApiTest extends TestCase
 
     public function test_index_summary_and_show_filter_by_date_range(): void
     {
-        factory(Sale::class)->create([
+        Sale::factory()->create([
             'subtotal_cents' => 1000000,
             'tip_percent' => 10,
             'tip_cents' => 100000,
@@ -80,7 +80,7 @@ final class SaleApiTest extends TestCase
             'paid_at' => '2026-11-10 15:00:00',
         ]);
         /** @var Sale $recent */
-        $recent = factory(Sale::class)->create([
+        $recent = Sale::factory()->create([
             'subtotal_cents' => 2000000,
             'tip_percent' => 10,
             'tip_cents' => 200000,

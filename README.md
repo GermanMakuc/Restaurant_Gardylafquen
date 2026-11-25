@@ -16,7 +16,7 @@ docker compose up -d --build
 ```
 
 - Frontend (Astro): http://localhost:4321
-- Backend API (PHP 7.4 + Apache): http://localhost:8000/api/v1/health
+- Backend API (PHP 8.3 + Apache): http://localhost:8000/api/v1/health
 - MySQL 8: puerto `3307` del host (db `restaurant`, usuario `restaurant`, clave `secret`)
 - Las migraciones se ejecutan automáticamente al iniciar `backend`.
 
@@ -24,7 +24,7 @@ Comandos útiles:
 
 ```bash
 docker compose exec backend php artisan db:seed
-docker compose exec backend ./vendor/bin/php-cs-fixer fix --dry-run --diff
+docker compose exec backend ./vendor/bin/pint --test
 docker compose exec backend ./vendor/bin/phpstan analyse --memory-limit=512M
 docker compose exec backend ./vendor/bin/phpunit
 docker compose down            # detener (conserva la base de datos)

@@ -11,7 +11,7 @@ use App\Models\Category;
 use App\Repositories\Contracts\CategoryRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
-final class EloquentCategoryRepository implements CategoryRepositoryInterface
+final readonly class EloquentCategoryRepository implements CategoryRepositoryInterface
 {
     /** @var array<string, array{0: string, 1: string}> */
     private const SORT_MAP = [
@@ -23,13 +23,13 @@ final class EloquentCategoryRepository implements CategoryRepositoryInterface
         '-created_at' => ['created_at', 'desc'],
     ];
 
-    private Category $model;
-
-    public function __construct(Category $model)
+    public function __construct(private Category $model)
     {
-        $this->model = $model;
     }
 
+    /**
+     * @return LengthAwarePaginator<int, Category>
+     */
     public function paginate(ListCategoriesDto $dto): LengthAwarePaginator
     {
         $query = $this->model->newQuery();

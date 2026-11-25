@@ -12,6 +12,9 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface WaiterRepositoryInterface
 {
+    /**
+     * @return LengthAwarePaginator<int, Waiter>
+     */
     public function paginate(ListWaitersDto $dto): LengthAwarePaginator;
 
     public function findById(int $id): ?Waiter;

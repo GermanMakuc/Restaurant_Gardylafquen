@@ -11,7 +11,7 @@ use App\Repositories\Contracts\SaleRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 
-final class EloquentSaleRepository implements SaleRepositoryInterface
+final readonly class EloquentSaleRepository implements SaleRepositoryInterface
 {
     /** @var array<string, array{0: string, 1: string}> */
     private const SORT_MAP = [
@@ -23,13 +23,13 @@ final class EloquentSaleRepository implements SaleRepositoryInterface
         '-total_cents' => ['total_cents', 'desc'],
     ];
 
-    private Sale $model;
-
-    public function __construct(Sale $model)
+    public function __construct(private Sale $model)
     {
-        $this->model = $model;
     }
 
+    /**
+     * @return LengthAwarePaginator<int, Sale>
+     */
     public function paginate(ListSalesDto $dto): LengthAwarePaginator
     {
         $query = $this->applyDateFilters($this->model->newQuery(), $dto)
@@ -105,6 +105,10 @@ final class EloquentSaleRepository implements SaleRepositoryInterface
         return $fresh;
     }
 
+    /**
+     * @param  Builder<Sale>  $query
+     * @return Builder<Sale>
+     */
     private function applyDateFilters(Builder $query, ListSalesDto $dto): Builder
     {
         if ($dto->fromDate() !== null) {

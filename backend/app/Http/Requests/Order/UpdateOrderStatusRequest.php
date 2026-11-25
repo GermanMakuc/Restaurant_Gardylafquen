@@ -21,7 +21,7 @@ final class UpdateOrderStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['required', 'string', 'in:' . implode(',', [OrderStatus::WAITING, OrderStatus::SERVED, OrderStatus::CANCELLED])],
+            'status' => ['required', 'string', 'in:' . implode(',', [OrderStatus::WAITING->value, OrderStatus::SERVED->value, OrderStatus::CANCELLED->value])],
         ];
     }
 

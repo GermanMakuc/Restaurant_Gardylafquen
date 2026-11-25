@@ -2,13 +2,25 @@
 
 declare(strict_types=1);
 
-use App\Models\Category;
-use Faker\Generator as Faker;
-use Illuminate\Database\Eloquent\Factory;
+namespace Database\Factories;
 
-/** @var Factory $factory */
-$factory->define(Category::class, static function (Faker $faker): array {
-    return [
-        'name' => ucfirst($faker->unique()->words(2, true)),
-    ];
-});
+use App\Models\Category;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends Factory<Category>
+ */
+final class CategoryFactory extends Factory
+{
+    protected $model = Category::class;
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'name' => ucfirst($this->faker->unique()->words(2, true)),
+        ];
+    }
+}

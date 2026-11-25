@@ -11,7 +11,7 @@ use App\Models\Product;
 use App\Repositories\Contracts\ProductRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
-final class EloquentProductRepository implements ProductRepositoryInterface
+final readonly class EloquentProductRepository implements ProductRepositoryInterface
 {
     /** @var array<string, array{0: string, 1: string}> */
     private const SORT_MAP = [
@@ -25,13 +25,13 @@ final class EloquentProductRepository implements ProductRepositoryInterface
         '-created_at' => ['created_at', 'desc'],
     ];
 
-    private Product $model;
-
-    public function __construct(Product $model)
+    public function __construct(private Product $model)
     {
-        $this->model = $model;
     }
 
+    /**
+     * @return LengthAwarePaginator<int, Product>
+     */
     public function paginate(ListProductsDto $dto): LengthAwarePaginator
     {
         $query = $this->model->newQuery()->with('category');

@@ -12,7 +12,7 @@ use App\Repositories\Contracts\TableRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-final class EloquentTableRepository implements TableRepositoryInterface
+final readonly class EloquentTableRepository implements TableRepositoryInterface
 {
     /** @var array<string, array{0: string, 1: string}> */
     private const SORT_MAP = [
@@ -26,13 +26,13 @@ final class EloquentTableRepository implements TableRepositoryInterface
         '-created_at' => ['created_at', 'desc'],
     ];
 
-    private Table $model;
-
-    public function __construct(Table $model)
+    public function __construct(private Table $model)
     {
-        $this->model = $model;
     }
 
+    /**
+     * @return LengthAwarePaginator<int, Table>
+     */
     public function paginate(ListTablesDto $dto): LengthAwarePaginator
     {
         $query = $this->model->newQuery();

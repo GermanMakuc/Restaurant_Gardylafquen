@@ -2,17 +2,29 @@
 
 declare(strict_types=1);
 
+namespace Database\Factories;
+
 use App\Enums\TableStatus;
 use App\Models\Table;
-use Faker\Generator as Faker;
-use Illuminate\Database\Eloquent\Factory;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-/** @var Factory $factory */
-$factory->define(Table::class, static function (Faker $faker): array {
-    return [
-        'number' => $faker->unique()->numberBetween(1, 500),
-        'label' => 'Salón',
-        'capacity' => $faker->numberBetween(2, 8),
-        'status' => TableStatus::AVAILABLE,
-    ];
-});
+/**
+ * @extends Factory<Table>
+ */
+final class TableFactory extends Factory
+{
+    protected $model = Table::class;
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'number' => $this->faker->unique()->numberBetween(1, 500),
+            'label' => 'Salón',
+            'capacity' => $this->faker->numberBetween(2, 8),
+            'status' => TableStatus::AVAILABLE->value,
+        ];
+    }
+}

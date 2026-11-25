@@ -2,30 +2,32 @@
 
 declare(strict_types=1);
 
+namespace Database\Factories;
+
 use App\Enums\OrderStatus;
 use App\Models\Order;
 use App\Models\Table;
 use App\Models\Waiter;
-use Faker\Generator as Faker;
-use Illuminate\Database\Eloquent\Factory;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-/** @var Factory $factory */
-$factory->define(Order::class, static function (Faker $faker): array {
-    return [
-        'table_id' => static function (): int {
-            /** @var Table $table */
-            $table = factory(Table::class)->create();
+/**
+ * @extends Factory<Order>
+ */
+final class OrderFactory extends Factory
+{
+    protected $model = Order::class;
 
-            return (int) $table->id;
-        },
-        'waiter_id' => static function (): int {
-            /** @var Waiter $waiter */
-            $waiter = factory(Waiter::class)->create();
-
-            return (int) $waiter->id;
-        },
-        'status' => OrderStatus::WAITING,
-        'notes' => $faker->optional()->sentence(5),
-        'subtotal_cents' => 0,
-    ];
-});
+    /**
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'table_id' => Table::factory(),
+            'waiter_id' => Waiter::factory(),
+            'status' => OrderStatus::WAITING->value,
+            'notes' => $this->faker->optional()->sentence(5),
+            'subtotal_cents' => 0,
+        ];
+    }
+}

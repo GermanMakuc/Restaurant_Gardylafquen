@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Exceptions;
 
-use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -14,49 +13,41 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Throwable;
 
 class Handler extends ExceptionHandler
 {
-    /**
-     * A list of the exception types that are not reported.
-     *
-     * @var array<int, string>
-     */
+    /** @var array<int, class-string<Throwable>> */
     protected $dontReport = [
         DomainException::class,
     ];
 
-    /**
-     * A list of the inputs that are never flashed for validation exceptions.
-     *
-     * @var array<int, string>
-     */
+    /** @var array<int, string> */
     protected $dontFlash = [
+        'current_password',
         'password',
         'password_confirmation',
     ];
 
-    public function report(Exception $exception): void
+    public function report(Throwable $e): void
     {
-        parent::report($exception);
+        parent::report($e);
     }
 
     /**
-     * Render an exception into an HTTP response.
-     *
      * @param  Request  $request
-     * @return Response
      */
-    public function render($request, Exception $exception)
+    public function render($request, Throwable $e): Response
     {
         if ($request->is('api/*') || $request->expectsJson()) {
-            return $this->renderApiException($exception);
+            return $this->renderApiException($e);
         }
 
-        return parent::render($request, $exception);
+        return parent::render($request, $e);
     }
 
-    private function renderApiException(Exception $exception): JsonResponse
+    private function renderApiException(Throwable $exception): JsonResponse
     {
         if ($exception instanceof ValidationException) {
             return new JsonResponse([
@@ -80,7 +71,10 @@ class Handler extends ExceptionHandler
             ], 403);
         }
 
-        if ($exception instanceof ModelNotFoundException) {
+        if (
+            $exception instanceof ModelNotFoundException ||
+            ($exception instanceof NotFoundHttpException && $exception->getPrevious() instanceof ModelNotFoundException)
+        ) {
             return new JsonResponse([
                 'message' => 'Recurso no encontrado.',
                 'code' => 'not_found',
@@ -98,16 +92,14 @@ class Handler extends ExceptionHandler
             $status = $exception->getStatusCode();
 
             return new JsonResponse([
-                'message' => $status === 404 ? 'Ruta o recurso no encontrado.' : ($exception->getMessage() ?: 'Error en la solicitud.'),
+                'message' => $exception->getMessage() !== '' ? $exception->getMessage() : 'Error HTTP.',
                 'code' => $status === 404 ? 'not_found' : 'http_error',
             ], $status);
         }
 
-        $debug = (bool) config('app.debug');
-
         return new JsonResponse([
-            'message' => $debug ? $exception->getMessage() : 'Error interno del servidor.',
-            'code' => 'internal_error',
+            'message' => 'Error interno del servidor.',
+            'code' => 'server_error',
         ], 500);
     }
 }

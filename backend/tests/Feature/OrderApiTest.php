@@ -25,13 +25,13 @@ final class OrderApiTest extends TestCase
     public function test_store_creates_order_computes_subtotal_and_occupies_table(): void
     {
         /** @var Table $table */
-        $table = factory(Table::class)->create(['number' => 1, 'status' => TableStatus::AVAILABLE]);
+        $table = Table::factory()->create(['number' => 1, 'status' => TableStatus::AVAILABLE->value]);
         /** @var Waiter $waiter */
-        $waiter = factory(Waiter::class)->create(['name' => 'Camila', 'is_active' => true]);
+        $waiter = Waiter::factory()->create(['name' => 'Camila', 'is_active' => true]);
         /** @var Product $p1 */
-        $p1 = factory(Product::class)->create(['name' => 'Empanada', 'price_cents' => 350000]);
+        $p1 = Product::factory()->create(['name' => 'Empanada', 'price_cents' => 350000]);
         /** @var Product $p2 */
-        $p2 = factory(Product::class)->create(['name' => 'Limonada', 'price_cents' => 320000]);
+        $p2 = Product::factory()->create(['name' => 'Limonada', 'price_cents' => 320000]);
 
         $response = $this->postJson('/api/v1/orders', [
             'table_id' => $table->id,
@@ -49,7 +49,7 @@ final class OrderApiTest extends TestCase
                 'data' => [
                     'table_id' => $table->id,
                     'waiter_id' => $waiter->id,
-                    'status' => OrderStatus::WAITING,
+                    'status' => OrderStatus::WAITING->value,
                     'notes' => 'Sin hielo',
                     'subtotal_cents' => 1020000,
                 ],
@@ -57,7 +57,7 @@ final class OrderApiTest extends TestCase
 
         $this->assertDatabaseHas('tables', [
             'id' => $table->id,
-            'status' => TableStatus::OCCUPIED,
+            'status' => TableStatus::OCCUPIED->value,
         ]);
 
         $this->postJson('/api/v1/orders', [
@@ -74,11 +74,11 @@ final class OrderApiTest extends TestCase
     public function test_index_and_show_return_orders_with_relations(): void
     {
         /** @var Table $table */
-        $table = factory(Table::class)->create(['number' => 3, 'status' => TableStatus::AVAILABLE]);
+        $table = Table::factory()->create(['number' => 3, 'status' => TableStatus::AVAILABLE->value]);
         /** @var Waiter $waiter */
-        $waiter = factory(Waiter::class)->create(['name' => 'Mateo', 'is_active' => true]);
+        $waiter = Waiter::factory()->create(['name' => 'Mateo', 'is_active' => true]);
         /** @var Product $product */
-        $product = factory(Product::class)->create(['name' => 'Salmón', 'price_cents' => 1290000]);
+        $product = Product::factory()->create(['name' => 'Salmón', 'price_cents' => 1290000]);
 
         $created = $this->postJson('/api/v1/orders', [
             'table_id' => $table->id,
@@ -111,15 +111,15 @@ final class OrderApiTest extends TestCase
     public function test_update_replaces_items_and_switches_tables(): void
     {
         /** @var Table $t1 */
-        $t1 = factory(Table::class)->create(['number' => 1, 'status' => TableStatus::AVAILABLE]);
+        $t1 = Table::factory()->create(['number' => 1, 'status' => TableStatus::AVAILABLE->value]);
         /** @var Table $t2 */
-        $t2 = factory(Table::class)->create(['number' => 2, 'status' => TableStatus::AVAILABLE]);
+        $t2 = Table::factory()->create(['number' => 2, 'status' => TableStatus::AVAILABLE->value]);
         /** @var Waiter $waiter */
-        $waiter = factory(Waiter::class)->create(['is_active' => true]);
+        $waiter = Waiter::factory()->create(['is_active' => true]);
         /** @var Product $p1 */
-        $p1 = factory(Product::class)->create(['price_cents' => 100000]);
+        $p1 = Product::factory()->create(['price_cents' => 100000]);
         /** @var Product $p2 */
-        $p2 = factory(Product::class)->create(['price_cents' => 250000]);
+        $p2 = Product::factory()->create(['price_cents' => 250000]);
 
         $created = $this->postJson('/api/v1/orders', [
             'table_id' => $t1->id,
@@ -143,18 +143,18 @@ final class OrderApiTest extends TestCase
                 ],
             ]);
 
-        $this->assertDatabaseHas('tables', ['id' => $t1->id, 'status' => TableStatus::AVAILABLE]);
-        $this->assertDatabaseHas('tables', ['id' => $t2->id, 'status' => TableStatus::OCCUPIED]);
+        $this->assertDatabaseHas('tables', ['id' => $t1->id, 'status' => TableStatus::AVAILABLE->value]);
+        $this->assertDatabaseHas('tables', ['id' => $t2->id, 'status' => TableStatus::OCCUPIED->value]);
     }
 
     public function test_update_status_and_destroy_free_table(): void
     {
         /** @var Table $t1 */
-        $t1 = factory(Table::class)->create(['number' => 8, 'status' => TableStatus::AVAILABLE]);
+        $t1 = Table::factory()->create(['number' => 8, 'status' => TableStatus::AVAILABLE->value]);
         /** @var Waiter $waiter */
-        $waiter = factory(Waiter::class)->create(['is_active' => true]);
+        $waiter = Waiter::factory()->create(['is_active' => true]);
         /** @var Product $product */
-        $product = factory(Product::class)->create(['price_cents' => 500000]);
+        $product = Product::factory()->create(['price_cents' => 500000]);
 
         $created = $this->postJson('/api/v1/orders', [
             'table_id' => $t1->id,
@@ -163,14 +163,14 @@ final class OrderApiTest extends TestCase
         ]);
         $orderId = (int) $created->json('data.id');
 
-        $this->patchJson('/api/v1/orders/' . $orderId . '/status', ['status' => OrderStatus::SERVED])
+        $this->patchJson('/api/v1/orders/' . $orderId . '/status', ['status' => OrderStatus::SERVED->value])
             ->assertStatus(200)
-            ->assertJson(['data' => ['status' => OrderStatus::SERVED]]);
+            ->assertJson(['data' => ['status' => OrderStatus::SERVED->value]]);
 
         $this->deleteJson('/api/v1/orders/' . $orderId)
             ->assertStatus(204);
 
         $this->assertSoftDeleted('restaurant_orders', ['id' => $orderId]);
-        $this->assertDatabaseHas('tables', ['id' => $t1->id, 'status' => TableStatus::AVAILABLE]);
+        $this->assertDatabaseHas('tables', ['id' => $t1->id, 'status' => TableStatus::AVAILABLE->value]);
     }
 }

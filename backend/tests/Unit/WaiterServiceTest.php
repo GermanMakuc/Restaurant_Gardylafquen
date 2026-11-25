@@ -21,7 +21,7 @@ final class WaiterServiceTest extends TestCase
     public function test_list_delegates_to_repository(): void
     {
         $dto = new ListWaitersDto('Camila', true, 'name', 10);
-        /** @var LengthAwarePaginator&MockObject $paginator */
+        /** @var LengthAwarePaginator<int, Waiter>&MockObject $paginator */
         $paginator = $this->createMock(LengthAwarePaginator::class);
 
         /** @var WaiterRepositoryInterface&MockObject $repository */

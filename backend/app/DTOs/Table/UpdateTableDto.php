@@ -19,13 +19,13 @@ final class UpdateTableDto
     public function __construct(
         int $number,
         int $capacity = 4,
-        string $status = TableStatus::AVAILABLE,
+        ?string $status = null,
         ?string $label = null
     ) {
         $trimmedLabel = $label !== null ? trim($label) : null;
         $this->number = $number;
         $this->capacity = $capacity;
-        $this->status = $status;
+        $this->status = $status ?? TableStatus::AVAILABLE->value;
         $this->label = ($trimmedLabel !== null && $trimmedLabel !== '') ? $trimmedLabel : null;
     }
 
@@ -36,7 +36,7 @@ final class UpdateTableDto
     {
         $number = isset($data['number']) && is_numeric($data['number']) ? (int) $data['number'] : 0;
         $capacity = isset($data['capacity']) && is_numeric($data['capacity']) ? (int) $data['capacity'] : 4;
-        $status = isset($data['status']) && is_string($data['status']) ? $data['status'] : TableStatus::AVAILABLE;
+        $status = isset($data['status']) && is_string($data['status']) ? $data['status'] : TableStatus::AVAILABLE->value;
         $label = isset($data['label']) && is_string($data['label']) ? $data['label'] : null;
 
         return new self($number, $capacity, $status, $label);

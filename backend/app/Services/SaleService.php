@@ -22,22 +22,16 @@ use Illuminate\Support\Facades\DB;
 
 final class SaleService
 {
-    private SaleRepositoryInterface $sales;
-
-    private OrderRepositoryInterface $orders;
-
-    private TableRepositoryInterface $tables;
-
     public function __construct(
-        SaleRepositoryInterface $sales,
-        OrderRepositoryInterface $orders,
-        TableRepositoryInterface $tables
+        private readonly SaleRepositoryInterface $sales,
+        private readonly OrderRepositoryInterface $orders,
+        private readonly TableRepositoryInterface $tables,
     ) {
-        $this->sales = $sales;
-        $this->orders = $orders;
-        $this->tables = $tables;
     }
 
+    /**
+     * @return LengthAwarePaginator<int, Sale>
+     */
     public function list(ListSalesDto $dto): LengthAwarePaginator
     {
         return $this->sales->paginate($dto);
@@ -67,7 +61,7 @@ final class SaleService
             throw new OrderNotFoundException($dto->orderId());
         }
 
-        if ($order->status === OrderStatus::PAID || $this->sales->existsForOrder((int) $order->id)) {
+        if ($order->status === OrderStatus::PAID->value || $this->sales->existsForOrder((int) $order->id)) {
             throw new OrderAlreadyPaidException((int) $order->id);
         }
 
@@ -92,11 +86,11 @@ final class SaleService
                 $paidAt
             );
 
-            $this->orders->updateStatus($order, OrderStatus::PAID);
+            $this->orders->updateStatus($order, OrderStatus::PAID->value);
 
             $table = $this->tables->findById((int) $order->table_id);
             if ($table !== null) {
-                $this->tables->updateStatus($table, TableStatus::AVAILABLE);
+                $this->tables->updateStatus($table, TableStatus::AVAILABLE->value);
             }
 
             return $created;

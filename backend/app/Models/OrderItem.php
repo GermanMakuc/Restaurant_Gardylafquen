@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -15,8 +16,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $unit_price_cents
  * @property int $quantity
  * @property int $line_total_cents
- * @property \Carbon\Carbon|null $created_at
- * @property \Carbon\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property-read Order|null $order
  * @property-read Product|null $product
  */
@@ -25,7 +26,7 @@ final class OrderItem extends Model
     /** @var string */
     protected $table = 'order_items';
 
-    /** @var array<int, string> */
+    /** @var list<string> */
     protected $fillable = [
         'order_id',
         'product_id',
@@ -35,21 +36,32 @@ final class OrderItem extends Model
         'line_total_cents',
     ];
 
-    /** @var array<string, string> */
-    protected $casts = [
-        'id' => 'int',
-        'order_id' => 'int',
-        'product_id' => 'int',
-        'unit_price_cents' => 'int',
-        'quantity' => 'int',
-        'line_total_cents' => 'int',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'id' => 'int',
+            'order_id' => 'int',
+            'product_id' => 'int',
+            'unit_price_cents' => 'int',
+            'quantity' => 'int',
+            'line_total_cents' => 'int',
+        ];
+    }
 
+    /**
+     * @return BelongsTo<Order, $this>
+     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class, 'order_id');
     }
 
+    /**
+     * @return BelongsTo<Product, $this>
+     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id');

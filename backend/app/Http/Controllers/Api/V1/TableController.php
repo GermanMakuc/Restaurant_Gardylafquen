@@ -16,11 +16,9 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 final class TableController extends Controller
 {
-    private TableService $service;
-
-    public function __construct(TableService $service)
-    {
-        $this->service = $service;
+    public function __construct(
+        private readonly TableService $service,
+    ) {
     }
 
     public function index(ListTablesRequest $request): AnonymousResourceCollection

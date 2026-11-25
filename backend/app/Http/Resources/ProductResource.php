@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Resources;
 
 use App\Models\Product;
-use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -27,10 +26,7 @@ final class ProductResource extends BaseJsonResource
 
         if ($imagePath !== null && $imagePath !== '') {
             $diskName = (string) config('filesystems.product_images_disk', 'public');
-            $disk = Storage::disk($diskName);
-            $imageUrl = $disk instanceof FilesystemAdapter
-                ? $disk->url($imagePath)
-                : url('/storage/' . ltrim($imagePath, '/'));
+            $imageUrl = Storage::disk($diskName)->url($imagePath);
         }
 
         return [

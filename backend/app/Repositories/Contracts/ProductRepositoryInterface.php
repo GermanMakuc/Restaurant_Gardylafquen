@@ -12,6 +12,9 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface ProductRepositoryInterface
 {
+    /**
+     * @return LengthAwarePaginator<int, Product>
+     */
     public function paginate(ListProductsDto $dto): LengthAwarePaginator;
 
     public function findById(int $id): ?Product;

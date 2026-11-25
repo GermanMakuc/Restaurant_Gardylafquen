@@ -33,10 +33,10 @@ final class AuthApiTest extends TestCase
     public function test_login_returns_bearer_token_and_stores_hashed_token_and_logout_revokes_it(): void
     {
         /** @var User $user */
-        $user = factory(User::class)->create([
+        $user = User::factory()->create([
             'email' => 'admin@gardylafquen.test',
             'password' => Hash::make('Admin123!'),
-            'role' => UserRole::ADMIN,
+            'role' => UserRole::ADMIN->value,
         ]);
 
         $loginRes = $this->postJson('/api/v1/auth/login', [
@@ -57,7 +57,7 @@ final class AuthApiTest extends TestCase
                     'token_type' => 'Bearer',
                     'user' => [
                         'id' => $user->id,
-                        'role' => UserRole::ADMIN,
+                        'role' => UserRole::ADMIN->value,
                     ],
                 ],
             ]);
@@ -65,28 +65,35 @@ final class AuthApiTest extends TestCase
         $plainToken = (string) $loginRes->json('data.token');
         $this->assertNotSame('', $plainToken);
 
-        /** @var User $fresh */
-        $fresh = $user->fresh();
-        $this->assertSame(hash('sha256', $plainToken), $fresh->api_token);
+        $parts = explode('|', $plainToken, 2);
+        $this->assertCount(2, $parts);
+        $this->assertDatabaseHas('personal_access_tokens', [
+            'tokenable_id' => $user->id,
+            'tokenable_type' => User::class,
+            'token' => hash('sha256', $parts[1]),
+        ]);
 
         $this->withHeader('Authorization', 'Bearer ' . $plainToken)
             ->getJson('/api/v1/auth/me')
             ->assertStatus(200)
-            ->assertJson(['data' => ['id' => $user->id, 'role' => UserRole::ADMIN]]);
+            ->assertJson(['data' => ['id' => $user->id, 'role' => UserRole::ADMIN->value]]);
 
         $this->withHeader('Authorization', 'Bearer ' . $plainToken)
             ->postJson('/api/v1/auth/logout')
             ->assertStatus(204);
 
-        $this->assertDatabaseHas('users', [
-            'id' => $user->id,
-            'api_token' => null,
-        ]);
+        $this->assertDatabaseCount('personal_access_tokens', 0);
+
+        $this->app->make('auth')->forgetGuards();
+
+        $this->withHeader('Authorization', 'Bearer ' . $plainToken)
+            ->getJson('/api/v1/auth/me')
+            ->assertStatus(401);
     }
 
     public function test_login_rejects_invalid_credentials(): void
     {
-        factory(User::class)->create([
+        User::factory()->create([
             'email' => 'admin@gardylafquen.test',
             'password' => Hash::make('Admin123!'),
         ]);
@@ -102,7 +109,7 @@ final class AuthApiTest extends TestCase
     public function test_role_policies_enforce_permissions(): void
     {
         /** @var Category $category */
-        $category = factory(Category::class)->create(['name' => 'Bebidas']);
+        $category = Category::factory()->create(['name' => 'Bebidas']);
 
         $this->actingAsRole(UserRole::WAITER);
 

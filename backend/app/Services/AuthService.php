@@ -13,14 +13,10 @@ use Illuminate\Contracts\Hashing\Hasher;
 
 final class AuthService
 {
-    private AuthRepositoryInterface $auth;
-
-    private Hasher $hasher;
-
-    public function __construct(AuthRepositoryInterface $auth, Hasher $hasher)
-    {
-        $this->auth = $auth;
-        $this->hasher = $hasher;
+    public function __construct(
+        private readonly AuthRepositoryInterface $auth,
+        private readonly Hasher $hasher,
+    ) {
     }
 
     public function login(LoginDto $dto): AuthTokenDto

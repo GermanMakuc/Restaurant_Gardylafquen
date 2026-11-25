@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\TableFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -13,18 +16,20 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $label
  * @property int $capacity
  * @property string $status
- * @property \Carbon\Carbon|null $created_at
- * @property \Carbon\Carbon|null $updated_at
- * @property \Carbon\Carbon|null $deleted_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
  */
 final class Table extends Model
 {
+    /** @use HasFactory<TableFactory> */
+    use HasFactory;
     use SoftDeletes;
 
     /** @var string */
     protected $table = 'tables';
 
-    /** @var array<int, string> */
+    /** @var list<string> */
     protected $fillable = [
         'number',
         'label',
@@ -32,11 +37,16 @@ final class Table extends Model
         'status',
     ];
 
-    /** @var array<string, string> */
-    protected $casts = [
-        'id' => 'int',
-        'number' => 'int',
-        'capacity' => 'int',
-        'deleted_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'id' => 'int',
+            'number' => 'int',
+            'capacity' => 'int',
+            'deleted_at' => 'datetime',
+        ];
+    }
 }

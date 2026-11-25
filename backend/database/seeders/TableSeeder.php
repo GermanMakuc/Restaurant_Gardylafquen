@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace Database\Seeders;
+
 use App\Enums\TableStatus;
 use App\Models\Table;
 use Illuminate\Database\Seeder;
@@ -16,7 +18,7 @@ class TableSeeder extends Seeder
                 [
                     'label' => $number <= 6 ? 'Salón' : 'Terraza',
                     'capacity' => $number % 2 === 0 ? 4 : 2,
-                    'status' => TableStatus::AVAILABLE,
+                    'status' => TableStatus::AVAILABLE->value,
                 ]
             );
         }

@@ -17,11 +17,9 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 final class ProductController extends Controller
 {
-    private ProductService $service;
-
-    public function __construct(ProductService $service)
-    {
-        $this->service = $service;
+    public function __construct(
+        private readonly ProductService $service,
+    ) {
     }
 
     public function index(ListProductsRequest $request): AnonymousResourceCollection

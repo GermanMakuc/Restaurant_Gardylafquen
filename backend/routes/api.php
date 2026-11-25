@@ -17,8 +17,7 @@ use Illuminate\Support\Facades\Route;
 | API Routes
 |--------------------------------------------------------------------------
 |
-| Versioned REST API routes (/api/v1/...). Protected with provisional api
-| token guard until Laravel Sanctum upgrade in Phase 5 (AGENTS.md §13.3).
+| Versioned REST API routes (/api/v1/...), protected with Laravel Sanctum.
 |
 */
 
@@ -28,7 +27,7 @@ Route::prefix('v1')->group(function (): void {
     Route::post('/auth/login', [AuthController::class, 'login'])
         ->middleware('throttle:10,1');
 
-    Route::middleware('auth:api')->group(function (): void {
+    Route::middleware('auth:sanctum')->group(function (): void {
         Route::get('/auth/me', [AuthController::class, 'me']);
         Route::post('/auth/logout', [AuthController::class, 'logout']);
 

@@ -2,15 +2,27 @@
 
 declare(strict_types=1);
 
-use App\Models\Waiter;
-use Faker\Generator as Faker;
-use Illuminate\Database\Eloquent\Factory;
+namespace Database\Factories;
 
-/** @var Factory $factory */
-$factory->define(Waiter::class, static function (Faker $faker): array {
-    return [
-        'name' => $faker->name,
-        'email' => $faker->unique()->safeEmail,
-        'is_active' => true,
-    ];
-});
+use App\Models\Waiter;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends Factory<Waiter>
+ */
+final class WaiterFactory extends Factory
+{
+    protected $model = Waiter::class;
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'name' => $this->faker->name(),
+            'email' => $this->faker->unique()->safeEmail(),
+            'is_active' => true,
+        ];
+    }
+}

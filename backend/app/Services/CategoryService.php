@@ -15,13 +15,14 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 final class CategoryService
 {
-    private CategoryRepositoryInterface $categories;
-
-    public function __construct(CategoryRepositoryInterface $categories)
-    {
-        $this->categories = $categories;
+    public function __construct(
+        private readonly CategoryRepositoryInterface $categories,
+    ) {
     }
 
+    /**
+     * @return LengthAwarePaginator<int, Category>
+     */
     public function list(ListCategoriesDto $dto): LengthAwarePaginator
     {
         return $this->categories->paginate($dto);

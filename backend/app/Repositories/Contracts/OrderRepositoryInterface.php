@@ -11,6 +11,9 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface OrderRepositoryInterface
 {
+    /**
+     * @return LengthAwarePaginator<int, Order>
+     */
     public function paginate(ListOrdersDto $dto): LengthAwarePaginator;
 
     public function findById(int $id): ?Order;

@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace Database\Seeders;
+
 use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -16,19 +18,19 @@ class UserSeeder extends Seeder
                 'name' => 'Administrador',
                 'email' => 'admin@gardylafquen.test',
                 'password' => 'Admin123!',
-                'role' => UserRole::ADMIN,
+                'role' => UserRole::ADMIN->value,
             ],
             [
                 'name' => 'Cajero',
                 'email' => 'caja@gardylafquen.test',
                 'password' => 'Caja1234!',
-                'role' => UserRole::CASHIER,
+                'role' => UserRole::CASHIER->value,
             ],
             [
                 'name' => 'Mesero Demo',
                 'email' => 'mesero@gardylafquen.test',
                 'password' => 'Mesero123!',
-                'role' => UserRole::WAITER,
+                'role' => UserRole::WAITER->value,
             ],
         ];
 

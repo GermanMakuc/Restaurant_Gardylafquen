@@ -12,7 +12,7 @@ use App\Repositories\Contracts\WaiterRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-final class EloquentWaiterRepository implements WaiterRepositoryInterface
+final readonly class EloquentWaiterRepository implements WaiterRepositoryInterface
 {
     /** @var array<string, array{0: string, 1: string}> */
     private const SORT_MAP = [
@@ -24,13 +24,13 @@ final class EloquentWaiterRepository implements WaiterRepositoryInterface
         '-created_at' => ['created_at', 'desc'],
     ];
 
-    private Waiter $model;
-
-    public function __construct(Waiter $model)
+    public function __construct(private Waiter $model)
     {
-        $this->model = $model;
     }
 
+    /**
+     * @return LengthAwarePaginator<int, Waiter>
+     */
     public function paginate(ListWaitersDto $dto): LengthAwarePaginator
     {
         $query = $this->model->newQuery();

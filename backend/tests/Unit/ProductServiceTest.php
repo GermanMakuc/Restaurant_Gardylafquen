@@ -19,7 +19,6 @@ use Illuminate\Contracts\Filesystem\Factory as FilesystemFactory;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\UploadedFile;
-use Intervention\Image\ImageManager;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -28,7 +27,7 @@ final class ProductServiceTest extends TestCase
     public function test_list_delegates_to_repository(): void
     {
         $dto = new ListProductsDto('Salmón', 2, 'name', 10);
-        /** @var LengthAwarePaginator&MockObject $paginator */
+        /** @var LengthAwarePaginator<int, Product>&MockObject $paginator */
         $paginator = $this->createMock(LengthAwarePaginator::class);
 
         /** @var ProductRepositoryInterface&MockObject $products */
@@ -43,7 +42,7 @@ final class ProductServiceTest extends TestCase
         /** @var FilesystemFactory&MockObject $filesystems */
         $filesystems = $this->createMock(FilesystemFactory::class);
 
-        $service = new ProductService($products, $categories, $filesystems, new ImageManager(['driver' => 'gd']));
+        $service = new ProductService($products, $categories, $filesystems);
 
         $this->assertSame($paginator, $service->list($dto));
     }
@@ -59,7 +58,7 @@ final class ProductServiceTest extends TestCase
         /** @var FilesystemFactory&MockObject $filesystems */
         $filesystems = $this->createMock(FilesystemFactory::class);
 
-        $service = new ProductService($products, $categories, $filesystems, new ImageManager(['driver' => 'gd']));
+        $service = new ProductService($products, $categories, $filesystems);
 
         $this->expectException(ProductNotFoundException::class);
         $service->findOrFail(42);
@@ -84,7 +83,7 @@ final class ProductServiceTest extends TestCase
         /** @var FilesystemFactory&MockObject $filesystems */
         $filesystems = $this->createMock(FilesystemFactory::class);
 
-        $service = new ProductService($products, $categories, $filesystems, new ImageManager(['driver' => 'gd']));
+        $service = new ProductService($products, $categories, $filesystems);
 
         $this->assertSame($created, $service->create($dto));
     }
@@ -104,7 +103,7 @@ final class ProductServiceTest extends TestCase
         /** @var FilesystemFactory&MockObject $filesystems */
         $filesystems = $this->createMock(FilesystemFactory::class);
 
-        $service = new ProductService($products, $categories, $filesystems, new ImageManager(['driver' => 'gd']));
+        $service = new ProductService($products, $categories, $filesystems);
 
         $this->expectException(CategoryNotFoundException::class);
         $service->create($dto);
@@ -132,7 +131,7 @@ final class ProductServiceTest extends TestCase
         /** @var FilesystemFactory&MockObject $filesystems */
         $filesystems = $this->createMock(FilesystemFactory::class);
 
-        $service = new ProductService($products, $categories, $filesystems, new ImageManager(['driver' => 'gd']));
+        $service = new ProductService($products, $categories, $filesystems);
 
         $this->assertSame($updated, $service->update(7, $dto));
     }
@@ -152,7 +151,7 @@ final class ProductServiceTest extends TestCase
             ->method('put')
             ->with(
                 $this->callback(static function (string $path): bool {
-                    return strpos($path, 'products/8-') === 0 && substr($path, -4) === '.jpg';
+                    return str_starts_with($path, 'products/8-') && str_ends_with($path, '.jpg');
                 }),
                 $this->isType('string')
             )
@@ -177,7 +176,7 @@ final class ProductServiceTest extends TestCase
         /** @var CategoryRepositoryInterface&MockObject $categories */
         $categories = $this->createMock(CategoryRepositoryInterface::class);
 
-        $service = new ProductService($products, $categories, $filesystems, new ImageManager(['driver' => 'gd']), 'public');
+        $service = new ProductService($products, $categories, $filesystems, 'public');
         $result = $service->uploadImage(8, new UploadProductImageDto($file));
 
         $this->assertSame($updated, $result);
@@ -198,7 +197,7 @@ final class ProductServiceTest extends TestCase
         /** @var FilesystemFactory&MockObject $filesystems */
         $filesystems = $this->createMock(FilesystemFactory::class);
 
-        $service = new ProductService($products, $categories, $filesystems, new ImageManager(['driver' => 'gd']));
+        $service = new ProductService($products, $categories, $filesystems);
         $service->delete(12);
     }
 }

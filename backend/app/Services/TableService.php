@@ -15,13 +15,14 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 final class TableService
 {
-    private TableRepositoryInterface $tables;
-
-    public function __construct(TableRepositoryInterface $tables)
-    {
-        $this->tables = $tables;
+    public function __construct(
+        private readonly TableRepositoryInterface $tables,
+    ) {
     }
 
+    /**
+     * @return LengthAwarePaginator<int, Table>
+     */
     public function list(ListTablesDto $dto): LengthAwarePaginator
     {
         return $this->tables->paginate($dto);

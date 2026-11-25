@@ -24,21 +24,21 @@ final class ProductApiTest extends TestCase
     public function test_index_returns_paginated_products_filtered_by_name_and_category(): void
     {
         /** @var Category $drinks */
-        $drinks = factory(Category::class)->create(['name' => 'Bebidas']);
+        $drinks = Category::factory()->create(['name' => 'Bebidas']);
         /** @var Category $desserts */
-        $desserts = factory(Category::class)->create(['name' => 'Postres']);
+        $desserts = Category::factory()->create(['name' => 'Postres']);
 
-        factory(Product::class)->create([
+        Product::factory()->create([
             'name' => 'Jugo Natural',
             'category_id' => $drinks->id,
             'price_cents' => 350000,
         ]);
-        factory(Product::class)->create([
+        Product::factory()->create([
             'name' => 'Jugo de Naranja',
             'category_id' => $drinks->id,
             'price_cents' => 380000,
         ]);
-        factory(Product::class)->create([
+        Product::factory()->create([
             'name' => 'Torta',
             'category_id' => $desserts->id,
             'price_cents' => 490000,
@@ -75,7 +75,7 @@ final class ProductApiTest extends TestCase
     public function test_store_creates_product_and_returns_201_with_location(): void
     {
         /** @var Category $category */
-        $category = factory(Category::class)->create(['name' => 'Entradas']);
+        $category = Category::factory()->create(['name' => 'Entradas']);
 
         $response = $this->postJson('/api/v1/products', [
             'name' => '  Empanada de pino  ',
@@ -118,11 +118,11 @@ final class ProductApiTest extends TestCase
     public function test_show_and_update_product(): void
     {
         /** @var Category $cat1 */
-        $cat1 = factory(Category::class)->create(['name' => 'Platos']);
+        $cat1 = Category::factory()->create(['name' => 'Platos']);
         /** @var Category $cat2 */
-        $cat2 = factory(Category::class)->create(['name' => 'Especiales']);
+        $cat2 = Category::factory()->create(['name' => 'Especiales']);
         /** @var Product $product */
-        $product = factory(Product::class)->create([
+        $product = Product::factory()->create([
             'name' => 'Merluza',
             'category_id' => $cat1->id,
             'price_cents' => 990000,
@@ -157,7 +157,7 @@ final class ProductApiTest extends TestCase
         Storage::fake('public');
 
         /** @var Product $product */
-        $product = factory(Product::class)->create();
+        $product = Product::factory()->create();
 
         $file = UploadedFile::fake()->image('salmon.jpg', 600, 600);
 
@@ -181,7 +181,7 @@ final class ProductApiTest extends TestCase
     public function test_destroy_soft_deletes_product_and_hides_it_from_api(): void
     {
         /** @var Product $product */
-        $product = factory(Product::class)->create(['name' => 'Temporal']);
+        $product = Product::factory()->create(['name' => 'Temporal']);
 
         $this->deleteJson('/api/v1/products/' . $product->id)
             ->assertStatus(204);

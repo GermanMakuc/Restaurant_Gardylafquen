@@ -15,13 +15,14 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 final class WaiterService
 {
-    private WaiterRepositoryInterface $waiters;
-
-    public function __construct(WaiterRepositoryInterface $waiters)
-    {
-        $this->waiters = $waiters;
+    public function __construct(
+        private readonly WaiterRepositoryInterface $waiters,
+    ) {
     }
 
+    /**
+     * @return LengthAwarePaginator<int, Waiter>
+     */
     public function list(ListWaitersDto $dto): LengthAwarePaginator
     {
         return $this->waiters->paginate($dto);

@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Database\Factories\ProductFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
@@ -17,19 +20,21 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $price_cents
  * @property string $path
  * @property string|null $image_path
- * @property \Carbon\Carbon|null $created_at
- * @property \Carbon\Carbon|null $updated_at
- * @property \Carbon\Carbon|null $deleted_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
  * @property-read Category|null $category
  */
 final class Product extends Model
 {
+    /** @use HasFactory<ProductFactory> */
+    use HasFactory;
     use SoftDeletes;
 
     /** @var string */
     protected $table = 'products';
 
-    /** @var array<int, string> */
+    /** @var list<string> */
     protected $fillable = [
         'name',
         'description',
@@ -40,15 +45,23 @@ final class Product extends Model
         'image_path',
     ];
 
-    /** @var array<string, string> */
-    protected $casts = [
-        'id' => 'int',
-        'category_id' => 'int',
-        'price' => 'int',
-        'price_cents' => 'int',
-        'deleted_at' => 'datetime',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'id' => 'int',
+            'category_id' => 'int',
+            'price' => 'int',
+            'price_cents' => 'int',
+            'deleted_at' => 'datetime',
+        ];
+    }
 
+    /**
+     * @return BelongsTo<Category, $this>
+     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'category_id');

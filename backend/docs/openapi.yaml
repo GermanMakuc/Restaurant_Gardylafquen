@@ -650,6 +650,164 @@ paths:
           description: Mesa eliminada
         "404":
           $ref: "#/components/responses/NotFound"
+  /orders:
+    get:
+      summary: Listar órdenes paginadas
+      operationId: listOrders
+      tags: [Orders]
+      parameters:
+        - name: filter[status]
+          in: query
+          schema: { type: string, enum: [waiting, served, paid, cancelled] }
+        - name: filter[table_id]
+          in: query
+          schema: { type: integer, minimum: 1 }
+        - name: filter[waiter_id]
+          in: query
+          schema: { type: integer, minimum: 1 }
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [id, -id, subtotal_cents, -subtotal_cents, created_at, -created_at]
+            default: -created_at
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: per_page
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 15 }
+      responses:
+        "200":
+          description: Listado paginado de órdenes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedOrders"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    post:
+      summary: Crear una nueva orden
+      operationId: createOrder
+      tags: [Orders]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderInput"
+      responses:
+        "201":
+          description: Orden creada
+          headers:
+            Location:
+              schema: { type: string, format: uri }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Order"
+        "409":
+          $ref: "#/components/responses/DomainConflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /orders/{order}:
+    parameters:
+      - name: order
+        in: path
+        required: true
+        schema: { type: integer, minimum: 1 }
+    get:
+      summary: Obtener una orden por ID
+      operationId: getOrder
+      tags: [Orders]
+      responses:
+        "200":
+          description: Detalle de la orden
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Order"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      summary: Actualizar una orden activa
+      operationId: replaceOrder
+      tags: [Orders]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderInput"
+      responses:
+        "200":
+          description: Orden actualizada
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Order"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/DomainConflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    delete:
+      summary: Eliminar (soft-delete) una orden no pagada
+      operationId: deleteOrder
+      tags: [Orders]
+      responses:
+        "204":
+          description: Orden eliminada
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/DomainConflict"
+  /orders/{order}/status:
+    parameters:
+      - name: order
+        in: path
+        required: true
+        schema: { type: integer, minimum: 1 }
+    patch:
+      summary: Cambiar el estado de una orden activa
+      operationId: updateOrderStatus
+      tags: [Orders]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderStatusInput"
+      responses:
+        "200":
+          description: Estado actualizado
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: "#/components/schemas/Order"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/DomainConflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
 components:
   responses:
     ValidationError:
@@ -812,6 +970,71 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Table"
+        links:
+          $ref: "#/components/schemas/PaginationLinks"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+    OrderItem:
+      type: object
+      required: [id, product_id, product_name, unit_price_cents, quantity, line_total_cents]
+      properties:
+        id: { type: integer }
+        product_id: { type: integer }
+        product_name: { type: string }
+        unit_price_cents: { type: integer }
+        quantity: { type: integer, minimum: 1 }
+        line_total_cents: { type: integer }
+    Order:
+      type: object
+      required: [id, table_id, waiter_id, status, notes, subtotal_cents, items, created_at, updated_at]
+      properties:
+        id: { type: integer }
+        table_id: { type: integer }
+        table:
+          $ref: "#/components/schemas/Table"
+        waiter_id: { type: integer }
+        waiter:
+          $ref: "#/components/schemas/Waiter"
+        status: { type: string, enum: [waiting, served, paid, cancelled] }
+        notes: { type: string, nullable: true, maxLength: 500 }
+        subtotal_cents: { type: integer, minimum: 0 }
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
+        created_at: { type: string, format: date-time, nullable: true }
+        updated_at: { type: string, format: date-time, nullable: true }
+    OrderItemInput:
+      type: object
+      required: [product_id, quantity]
+      properties:
+        product_id: { type: integer, minimum: 1 }
+        quantity: { type: integer, minimum: 1, maximum: 999 }
+    OrderInput:
+      type: object
+      required: [table_id, waiter_id, items]
+      properties:
+        table_id: { type: integer, minimum: 1 }
+        waiter_id: { type: integer, minimum: 1 }
+        notes: { type: string, nullable: true, maxLength: 500 }
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/OrderItemInput"
+    OrderStatusInput:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, enum: [waiting, served, cancelled] }
+    PaginatedOrders:
+      type: object
+      required: [data, links, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Order"
         links:
           $ref: "#/components/schemas/PaginationLinks"
         meta:

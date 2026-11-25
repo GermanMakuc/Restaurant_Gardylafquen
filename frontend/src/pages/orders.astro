@@ -1,0 +1,60 @@
+---
+import OrdersManager from '../features/orders/OrdersManager.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { listOrders } from '../lib/api/orders';
+import { listProducts } from '../lib/api/products';
+import { listTables } from '../lib/api/tables';
+import { listWaiters } from '../lib/api/waiters';
+import { es } from '../lib/i18n/es';
+import type { PaginatedResponse } from '../types/api';
+import type { Order, OrderStatus } from '../types/order';
+import type { Product } from '../types/product';
+import type { RestaurantTable } from '../types/table';
+import type { Waiter } from '../types/waiter';
+
+const rawStatus = Astro.url.searchParams.get('status') ?? '';
+const allowed: OrderStatus[] = ['waiting', 'served', 'paid', 'cancelled'];
+const selectedStatus = allowed.includes(rawStatus as OrderStatus)
+  ? (rawStatus as OrderStatus)
+  : '';
+const rawPage = Number(Astro.url.searchParams.get('page') ?? '1');
+const currentPage = Number.isInteger(rawPage) && rawPage > 0 ? rawPage : 1;
+
+let result: PaginatedResponse<Order> | null = null;
+let tables: RestaurantTable[] = [];
+let waiters: Waiter[] = [];
+let products: Product[] = [];
+let loadFailed = false;
+
+try {
+  const [ordersRes, tablesRes, waitersRes, productsRes] = await Promise.all([
+    listOrders({
+      ...(selectedStatus !== '' ? { status: selectedStatus } : {}),
+      sort: '-created_at',
+      page: currentPage,
+      perPage: 15,
+    }),
+    listTables({ sort: 'number', perPage: 100 }),
+    listWaiters({ isActive: true, sort: 'name', perPage: 100 }),
+    listProducts({ sort: 'name', perPage: 100 }),
+  ]);
+
+  result = ordersRes;
+  tables = tablesRes.data;
+  waiters = waitersRes.data;
+  products = productsRes.data;
+} catch {
+  loadFailed = true;
+}
+---
+
+<BaseLayout title={es.orders.pageTitle}>
+  <OrdersManager
+    result={result}
+    tables={tables}
+    waiters={waiters}
+    products={products}
+    selectedStatus={selectedStatus}
+    loadFailed={loadFailed}
+  />
+</BaseLayout>

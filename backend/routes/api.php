@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\V1\CategoryController;
 use App\Http\Controllers\Api\V1\HealthController;
+use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\TableController;
 use App\Http\Controllers\Api\V1\WaiterController;
@@ -29,6 +30,8 @@ Route::prefix('v1')->group(function (): void {
     Route::post('/products/{product}/image', [ProductController::class, 'uploadImage']);
     Route::apiResource('waiters', WaiterController::class);
     Route::apiResource('tables', TableController::class);
+    Route::apiResource('orders', OrderController::class);
+    Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus']);
 
     Route::middleware('auth:api')->get('/user', function (Request $request) {
         return $request->user();

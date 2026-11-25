@@ -10,6 +10,11 @@ const { currentPath } = Astro.props;
 const navItems = [
   { href: '/', label: es.nav.home, active: currentPath === '/' },
   {
+    href: '/orders',
+    label: es.nav.orders,
+    active: currentPath === '/orders' || currentPath.startsWith('/orders/'),
+  },
+  {
     href: '/waiters',
     label: es.nav.waiters,
     active: currentPath === '/waiters' || currentPath.startsWith('/waiters/'),

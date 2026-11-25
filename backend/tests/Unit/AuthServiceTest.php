@@ -36,10 +36,13 @@ final class AuthServiceTest extends TestCase
         $hasher->expects($this->once())->method('check')->with('Secret123!', 'hashed-password')->willReturn(true);
 
         $service = new AuthService($auth, $hasher);
-        $result = $service->login(new LoginDto('Admin@Gardylafquen.test', 'Secret123!'));
+        $result = $service->login(LoginDto::fromArray([
+            'email' => 'Admin@Gardylafquen.test',
+            'password' => 'Secret123!',
+        ]));
 
-        $this->assertSame('plain-token-123', $result->token());
-        $this->assertSame($user, $result->user());
+        $this->assertSame('plain-token-123', $result->token);
+        $this->assertSame($user, $result->user);
     }
 
     public function test_login_throws_when_user_not_found_or_password_mismatch(): void

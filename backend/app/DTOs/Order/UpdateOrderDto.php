@@ -4,31 +4,17 @@ declare(strict_types=1);
 
 namespace App\DTOs\Order;
 
-final class UpdateOrderDto
+final readonly class UpdateOrderDto
 {
-    private int $tableId;
-
-    private int $waiterId;
-
-    private ?string $notes;
-
-    /** @var array<int, OrderItemInputDto> */
-    private array $items;
-
     /**
      * @param  array<int, OrderItemInputDto>  $items
      */
     public function __construct(
-        int $tableId,
-        int $waiterId,
-        ?string $notes,
-        array $items
+        public int $tableId,
+        public int $waiterId,
+        public ?string $notes,
+        public array $items,
     ) {
-        $trimmedNotes = $notes !== null ? trim($notes) : null;
-        $this->tableId = $tableId;
-        $this->waiterId = $waiterId;
-        $this->notes = ($trimmedNotes !== null && $trimmedNotes !== '') ? $trimmedNotes : null;
-        $this->items = $items;
     }
 
     /**
@@ -38,7 +24,8 @@ final class UpdateOrderDto
     {
         $tableId = isset($data['table_id']) && is_numeric($data['table_id']) ? (int) $data['table_id'] : 0;
         $waiterId = isset($data['waiter_id']) && is_numeric($data['waiter_id']) ? (int) $data['waiter_id'] : 0;
-        $notes = isset($data['notes']) && is_string($data['notes']) ? $data['notes'] : null;
+        $rawNotes = isset($data['notes']) && is_string($data['notes']) ? trim($data['notes']) : null;
+        $notes = ($rawNotes !== null && $rawNotes !== '') ? $rawNotes : null;
 
         $items = [];
         if (isset($data['items']) && is_array($data['items'])) {
@@ -52,28 +39,5 @@ final class UpdateOrderDto
         }
 
         return new self($tableId, $waiterId, $notes, $items);
-    }
-
-    public function tableId(): int
-    {
-        return $this->tableId;
-    }
-
-    public function waiterId(): int
-    {
-        return $this->waiterId;
-    }
-
-    public function notes(): ?string
-    {
-        return $this->notes;
-    }
-
-    /**
-     * @return array<int, OrderItemInputDto>
-     */
-    public function items(): array
-    {
-        return $this->items;
     }
 }

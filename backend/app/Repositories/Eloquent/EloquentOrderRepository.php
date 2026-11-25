@@ -34,26 +34,26 @@ final readonly class EloquentOrderRepository implements OrderRepositoryInterface
     {
         $query = $this->model->newQuery()->with(['table', 'waiter', 'items']);
 
-        if ($dto->status() !== null) {
-            $query->where('status', $dto->status());
+        if ($dto->status !== null) {
+            $query->where('status', $dto->status);
         }
 
-        if ($dto->tableId() !== null) {
-            $query->where('table_id', $dto->tableId());
+        if ($dto->tableId !== null) {
+            $query->where('table_id', $dto->tableId);
         }
 
-        if ($dto->waiterId() !== null) {
-            $query->where('waiter_id', $dto->waiterId());
+        if ($dto->waiterId !== null) {
+            $query->where('waiter_id', $dto->waiterId);
         }
 
-        $sortConfig = self::SORT_MAP[$dto->sort()] ?? self::SORT_MAP['-created_at'];
+        $sortConfig = self::SORT_MAP[$dto->sort] ?? self::SORT_MAP['-created_at'];
         $query->orderBy($sortConfig[0], $sortConfig[1]);
 
         if ($sortConfig[0] !== 'id') {
             $query->orderBy('id', 'desc');
         }
 
-        return $query->paginate($dto->perPage());
+        return $query->paginate($dto->perPage);
     }
 
     public function findById(int $id): ?Order
@@ -149,11 +149,11 @@ final readonly class EloquentOrderRepository implements OrderRepositoryInterface
         $rows = [];
         foreach ($items as $item) {
             $rows[] = [
-                'product_id' => $item->productId(),
-                'product_name' => $item->productName(),
-                'unit_price_cents' => $item->unitPriceCents(),
-                'quantity' => $item->quantity(),
-                'line_total_cents' => $item->lineTotalCents(),
+                'product_id' => $item->productId,
+                'product_name' => $item->productName,
+                'unit_price_cents' => $item->unitPriceCents,
+                'quantity' => $item->quantity,
+                'line_total_cents' => $item->lineTotalCents,
             ];
         }
 

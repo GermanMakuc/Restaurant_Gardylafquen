@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace App\DTOs\Order;
 
-final class UpdateOrderStatusDto
+final readonly class UpdateOrderStatusDto
 {
-    private string $status;
-
-    public function __construct(string $status)
-    {
-        $this->status = trim($status);
+    public function __construct(
+        public string $status,
+    ) {
     }
 
     /**
@@ -18,13 +16,8 @@ final class UpdateOrderStatusDto
      */
     public static function fromArray(array $data): self
     {
-        $status = isset($data['status']) && is_string($data['status']) ? $data['status'] : '';
+        $status = isset($data['status']) && is_string($data['status']) ? trim($data['status']) : '';
 
         return new self($status);
-    }
-
-    public function status(): string
-    {
-        return $this->status;
     }
 }

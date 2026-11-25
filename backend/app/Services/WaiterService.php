@@ -41,8 +41,8 @@ final class WaiterService
 
     public function create(CreateWaiterDto $dto): Waiter
     {
-        if ($this->waiters->existsByEmail($dto->email())) {
-            throw new DuplicateWaiterEmailException($dto->email());
+        if ($this->waiters->existsByEmail($dto->email)) {
+            throw new DuplicateWaiterEmailException($dto->email);
         }
 
         return $this->waiters->create($dto);
@@ -52,8 +52,8 @@ final class WaiterService
     {
         $waiter = $this->findOrFail($id);
 
-        if ($this->waiters->existsByEmail($dto->email(), $id)) {
-            throw new DuplicateWaiterEmailException($dto->email());
+        if ($this->waiters->existsByEmail($dto->email, $id)) {
+            throw new DuplicateWaiterEmailException($dto->email);
         }
 
         return $this->waiters->update($waiter, $dto);

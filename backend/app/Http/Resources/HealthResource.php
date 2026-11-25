@@ -20,10 +20,10 @@ final class HealthResource extends JsonResource
     public function toArray($request): array
     {
         return [
-            'status' => $this->resource->status(),
-            'service' => $this->resource->service(),
-            'database' => $this->resource->database(),
-            'timestamp' => $this->resource->timestamp(),
+            'status' => $this->resource->status,
+            'service' => $this->resource->service,
+            'database' => $this->resource->database,
+            'timestamp' => $this->resource->timestamp,
         ];
     }
 }

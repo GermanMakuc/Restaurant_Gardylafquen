@@ -4,16 +4,12 @@ declare(strict_types=1);
 
 namespace App\DTOs\Auth;
 
-final class LoginDto
+final readonly class LoginDto
 {
-    private string $email;
-
-    private string $password;
-
-    public function __construct(string $email, string $password)
-    {
-        $this->email = mb_strtolower(trim($email));
-        $this->password = $password;
+    public function __construct(
+        public string $email,
+        public string $password,
+    ) {
     }
 
     /**
@@ -21,19 +17,9 @@ final class LoginDto
      */
     public static function fromArray(array $data): self
     {
-        $email = isset($data['email']) && is_string($data['email']) ? $data['email'] : '';
+        $email = isset($data['email']) && is_string($data['email']) ? mb_strtolower(trim($data['email'])) : '';
         $password = isset($data['password']) && is_string($data['password']) ? $data['password'] : '';
 
         return new self($email, $password);
-    }
-
-    public function email(): string
-    {
-        return $this->email;
-    }
-
-    public function password(): string
-    {
-        return $this->password;
     }
 }

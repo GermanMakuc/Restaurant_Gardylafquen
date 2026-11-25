@@ -41,8 +41,8 @@ final class TableService
 
     public function create(CreateTableDto $dto): Table
     {
-        if ($this->tables->existsByNumber($dto->number())) {
-            throw new DuplicateTableNumberException($dto->number());
+        if ($this->tables->existsByNumber($dto->number)) {
+            throw new DuplicateTableNumberException($dto->number);
         }
 
         return $this->tables->create($dto);
@@ -52,8 +52,8 @@ final class TableService
     {
         $table = $this->findOrFail($id);
 
-        if ($this->tables->existsByNumber($dto->number(), $id)) {
-            throw new DuplicateTableNumberException($dto->number());
+        if ($this->tables->existsByNumber($dto->number, $id)) {
+            throw new DuplicateTableNumberException($dto->number);
         }
 
         return $this->tables->update($table, $dto);

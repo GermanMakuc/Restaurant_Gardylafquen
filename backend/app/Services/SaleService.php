@@ -55,10 +55,10 @@ final class SaleService
 
     public function create(CreateSaleDto $dto): Sale
     {
-        $order = $this->orders->findById($dto->orderId());
+        $order = $this->orders->findById($dto->orderId);
 
         if ($order === null) {
-            throw new OrderNotFoundException($dto->orderId());
+            throw new OrderNotFoundException($dto->orderId);
         }
 
         if ($order->status === OrderStatus::PAID->value || $this->sales->existsForOrder((int) $order->id)) {
@@ -70,7 +70,7 @@ final class SaleService
         }
 
         $subtotalCents = (int) $order->subtotal_cents;
-        $tipPercent = $dto->tipPercent();
+        $tipPercent = $dto->tipPercent;
         $tipCents = (int) round(($subtotalCents * $tipPercent) / 100);
         $totalCents = $subtotalCents + $tipCents;
         $paidAt = gmdate('Y-m-d H:i:s');

@@ -6,25 +6,11 @@ namespace App\DTOs\Auth;
 
 use App\Models\User;
 
-final class AuthTokenDto
+final readonly class AuthTokenDto
 {
-    private string $token;
-
-    private User $user;
-
-    public function __construct(string $token, User $user)
-    {
-        $this->token = $token;
-        $this->user = $user;
-    }
-
-    public function token(): string
-    {
-        return $this->token;
-    }
-
-    public function user(): User
-    {
-        return $this->user;
+    public function __construct(
+        public string $token,
+        public User $user,
+    ) {
     }
 }

@@ -53,8 +53,8 @@ final class OrderServiceTest extends TestCase
                 1050000,
                 $this->callback(static function (array $items): bool {
                     return count($items) === 1
-                        && $items[0]->quantity() === 3
-                        && $items[0]->lineTotalCents() === 1050000;
+                        && $items[0]->quantity === 3
+                        && $items[0]->lineTotalCents === 1050000;
                 })
             )
             ->willReturn($createdOrder);

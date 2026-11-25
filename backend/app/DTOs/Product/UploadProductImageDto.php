@@ -6,17 +6,10 @@ namespace App\DTOs\Product;
 
 use Illuminate\Http\UploadedFile;
 
-final class UploadProductImageDto
+final readonly class UploadProductImageDto
 {
-    private UploadedFile $image;
-
-    public function __construct(UploadedFile $image)
-    {
-        $this->image = $image;
-    }
-
-    public function image(): UploadedFile
-    {
-        return $this->image;
+    public function __construct(
+        public UploadedFile $image,
+    ) {
     }
 }

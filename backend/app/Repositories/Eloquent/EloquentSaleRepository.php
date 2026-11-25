@@ -35,14 +35,14 @@ final readonly class EloquentSaleRepository implements SaleRepositoryInterface
         $query = $this->applyDateFilters($this->model->newQuery(), $dto)
             ->with(['order.table', 'order.waiter', 'order.items']);
 
-        $sortConfig = self::SORT_MAP[$dto->sort()] ?? self::SORT_MAP['-paid_at'];
+        $sortConfig = self::SORT_MAP[$dto->sort] ?? self::SORT_MAP['-paid_at'];
         $query->orderBy($sortConfig[0], $sortConfig[1]);
 
         if ($sortConfig[0] !== 'id') {
             $query->orderBy('id', 'desc');
         }
 
-        return $query->paginate($dto->perPage());
+        return $query->paginate($dto->perPage);
     }
 
     public function summarize(ListSalesDto $dto): SalesSummaryDto
@@ -111,12 +111,12 @@ final readonly class EloquentSaleRepository implements SaleRepositoryInterface
      */
     private function applyDateFilters(Builder $query, ListSalesDto $dto): Builder
     {
-        if ($dto->fromDate() !== null) {
-            $query->where('paid_at', '>=', $dto->fromDate() . ' 00:00:00');
+        if ($dto->fromDate !== null) {
+            $query->where('paid_at', '>=', $dto->fromDate . ' 00:00:00');
         }
 
-        if ($dto->toDate() !== null) {
-            $query->where('paid_at', '<=', $dto->toDate() . ' 23:59:59');
+        if ($dto->toDate !== null) {
+            $query->where('paid_at', '<=', $dto->toDate . ' 23:59:59');
         }
 
         return $query;

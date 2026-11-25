@@ -60,17 +60,17 @@ final class OrderService
 
     public function create(CreateOrderDto $dto): Order
     {
-        $table = $this->requireAvailableTable($dto->tableId());
-        $this->requireActiveWaiter($dto->waiterId());
-        $resolved = $this->resolveItems($dto->items());
+        $table = $this->requireAvailableTable($dto->tableId);
+        $this->requireActiveWaiter($dto->waiterId);
+        $resolved = $this->resolveItems($dto->items);
 
         /** @var Order $created */
         $created = DB::transaction(function () use ($dto, $table, $resolved): Order {
             $order = $this->orders->createWithItems(
-                $dto->tableId(),
-                $dto->waiterId(),
+                $dto->tableId,
+                $dto->waiterId,
                 OrderStatus::WAITING->value,
-                $dto->notes(),
+                $dto->notes,
                 $resolved['subtotalCents'],
                 $resolved['items']
             );
@@ -92,22 +92,22 @@ final class OrderService
         }
 
         $previousTableId = (int) $order->table_id;
-        $targetTable = $this->requireAvailableTable($dto->tableId(), $id, $previousTableId);
-        $this->requireActiveWaiter($dto->waiterId());
-        $resolved = $this->resolveItems($dto->items());
+        $targetTable = $this->requireAvailableTable($dto->tableId, $id, $previousTableId);
+        $this->requireActiveWaiter($dto->waiterId);
+        $resolved = $this->resolveItems($dto->items);
 
         /** @var Order $updated */
         $updated = DB::transaction(function () use ($order, $dto, $previousTableId, $targetTable, $resolved): Order {
             $saved = $this->orders->replaceWithItems(
                 $order,
-                $dto->tableId(),
-                $dto->waiterId(),
-                $dto->notes(),
+                $dto->tableId,
+                $dto->waiterId,
+                $dto->notes,
                 $resolved['subtotalCents'],
                 $resolved['items']
             );
 
-            if ($previousTableId !== $dto->tableId()) {
+            if ($previousTableId !== $dto->tableId) {
                 $previousTable = $this->tables->findById($previousTableId);
                 if ($previousTable !== null) {
                     $this->tables->updateStatus($previousTable, TableStatus::AVAILABLE->value);
@@ -124,7 +124,7 @@ final class OrderService
     public function updateStatus(int $id, UpdateOrderStatusDto $dto): Order
     {
         $order = $this->findOrFail($id);
-        $targetStatus = $dto->status();
+        $targetStatus = $dto->status;
 
         if ($order->status === $targetStatus) {
             return $order;
@@ -226,8 +226,8 @@ final class OrderService
         /** @var array<int, int> $quantitiesByProduct */
         $quantitiesByProduct = [];
         foreach ($inputItems as $item) {
-            $pid = $item->productId();
-            $quantitiesByProduct[$pid] = ($quantitiesByProduct[$pid] ?? 0) + $item->quantity();
+            $pid = $item->productId;
+            $quantitiesByProduct[$pid] = ($quantitiesByProduct[$pid] ?? 0) + $item->quantity;
         }
 
         $resolvedItems = [];

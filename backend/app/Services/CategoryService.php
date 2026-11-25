@@ -41,8 +41,8 @@ final class CategoryService
 
     public function create(CreateCategoryDto $dto): Category
     {
-        if ($this->categories->existsByName($dto->name())) {
-            throw new DuplicateCategoryException($dto->name());
+        if ($this->categories->existsByName($dto->name)) {
+            throw new DuplicateCategoryException($dto->name);
         }
 
         return $this->categories->create($dto);
@@ -52,8 +52,8 @@ final class CategoryService
     {
         $category = $this->findOrFail($id);
 
-        if ($this->categories->existsByName($dto->name(), $id)) {
-            throw new DuplicateCategoryException($dto->name());
+        if ($this->categories->existsByName($dto->name, $id)) {
+            throw new DuplicateCategoryException($dto->name);
         }
 
         return $this->categories->update($category, $dto);

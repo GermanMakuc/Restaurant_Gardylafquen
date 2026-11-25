@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace App\DTOs\Category;
 
-final class CreateCategoryDto
+final readonly class CreateCategoryDto
 {
-    private string $name;
-
-    public function __construct(string $name)
-    {
-        $this->name = trim($name);
+    public function __construct(
+        public string $name,
+    ) {
     }
 
     /**
@@ -18,13 +16,8 @@ final class CreateCategoryDto
      */
     public static function fromArray(array $data): self
     {
-        $name = isset($data['name']) && is_string($data['name']) ? $data['name'] : '';
+        $name = isset($data['name']) && is_string($data['name']) ? trim($data['name']) : '';
 
         return new self($name);
-    }
-
-    public function name(): string
-    {
-        return $this->name;
     }
 }

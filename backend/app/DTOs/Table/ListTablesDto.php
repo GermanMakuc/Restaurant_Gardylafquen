@@ -4,23 +4,13 @@ declare(strict_types=1);
 
 namespace App\DTOs\Table;
 
-final class ListTablesDto
+final readonly class ListTablesDto
 {
-    private ?string $status;
-
-    private string $sort;
-
-    private int $perPage;
-
     public function __construct(
-        ?string $status = null,
-        string $sort = 'number',
-        int $perPage = 20
+        public ?string $status = null,
+        public string $sort = 'number',
+        public int $perPage = 20,
     ) {
-        $trimmed = $status !== null ? trim($status) : null;
-        $this->status = ($trimmed !== null && $trimmed !== '') ? $trimmed : null;
-        $this->sort = $sort;
-        $this->perPage = max(1, min(100, $perPage));
     }
 
     /**
@@ -29,25 +19,11 @@ final class ListTablesDto
     public static function fromArray(array $data): self
     {
         $filter = isset($data['filter']) && is_array($data['filter']) ? $data['filter'] : [];
-        $status = isset($filter['status']) && is_string($filter['status']) ? $filter['status'] : null;
+        $rawStatus = isset($filter['status']) && is_string($filter['status']) ? trim($filter['status']) : null;
+        $status = ($rawStatus !== null && $rawStatus !== '') ? $rawStatus : null;
         $sort = isset($data['sort']) && is_string($data['sort']) ? $data['sort'] : 'number';
-        $perPage = isset($data['per_page']) && is_numeric($data['per_page']) ? (int) $data['per_page'] : 20;
+        $rawPerPage = isset($data['per_page']) && is_numeric($data['per_page']) ? (int) $data['per_page'] : 20;
 
-        return new self($status, $sort, $perPage);
-    }
-
-    public function status(): ?string
-    {
-        return $this->status;
-    }
-
-    public function sort(): string
-    {
-        return $this->sort;
-    }
-
-    public function perPage(): int
-    {
-        return $this->perPage;
+        return new self($status, $sort, max(1, min(100, $rawPerPage)));
     }
 }

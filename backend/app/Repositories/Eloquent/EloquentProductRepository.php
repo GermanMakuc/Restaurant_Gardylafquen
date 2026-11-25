@@ -36,23 +36,23 @@ final readonly class EloquentProductRepository implements ProductRepositoryInter
     {
         $query = $this->model->newQuery()->with('category');
 
-        if ($dto->nameFilter() !== null) {
-            $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $dto->nameFilter());
+        if ($dto->nameFilter !== null) {
+            $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $dto->nameFilter);
             $query->where('name', 'like', '%' . $escaped . '%');
         }
 
-        if ($dto->categoryId() !== null) {
-            $query->where('category_id', $dto->categoryId());
+        if ($dto->categoryId !== null) {
+            $query->where('category_id', $dto->categoryId);
         }
 
-        $sortConfig = self::SORT_MAP[$dto->sort()] ?? self::SORT_MAP['-created_at'];
+        $sortConfig = self::SORT_MAP[$dto->sort] ?? self::SORT_MAP['-created_at'];
         $query->orderBy($sortConfig[0], $sortConfig[1]);
 
         if ($sortConfig[0] !== 'id') {
             $query->orderBy('id', 'desc');
         }
 
-        return $query->paginate($dto->perPage());
+        return $query->paginate($dto->perPage);
     }
 
     public function findById(int $id): ?Product
@@ -67,11 +67,11 @@ final readonly class EloquentProductRepository implements ProductRepositoryInter
     {
         /** @var Product $product */
         $product = $this->model->newQuery()->create([
-            'name' => $dto->name(),
-            'description' => $dto->description(),
-            'category_id' => $dto->categoryId(),
-            'price_cents' => $dto->priceCents(),
-            'price' => intdiv($dto->priceCents(), 100),
+            'name' => $dto->name,
+            'description' => $dto->description,
+            'category_id' => $dto->categoryId,
+            'price_cents' => $dto->priceCents,
+            'price' => intdiv($dto->priceCents, 100),
             'path' => '',
             'image_path' => null,
         ]);
@@ -85,11 +85,11 @@ final readonly class EloquentProductRepository implements ProductRepositoryInter
     public function update(Product $product, UpdateProductDto $dto): Product
     {
         $product->update([
-            'name' => $dto->name(),
-            'description' => $dto->description(),
-            'category_id' => $dto->categoryId(),
-            'price_cents' => $dto->priceCents(),
-            'price' => intdiv($dto->priceCents(), 100),
+            'name' => $dto->name,
+            'description' => $dto->description,
+            'category_id' => $dto->categoryId,
+            'price_cents' => $dto->priceCents,
+            'price' => intdiv($dto->priceCents, 100),
         ]);
 
         /** @var Product $fresh */

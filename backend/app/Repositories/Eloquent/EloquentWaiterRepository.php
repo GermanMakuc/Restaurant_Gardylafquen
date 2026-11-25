@@ -35,23 +35,23 @@ final readonly class EloquentWaiterRepository implements WaiterRepositoryInterfa
     {
         $query = $this->model->newQuery();
 
-        if ($dto->nameFilter() !== null) {
-            $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $dto->nameFilter());
+        if ($dto->nameFilter !== null) {
+            $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $dto->nameFilter);
             $query->where('name', 'like', '%' . $escaped . '%');
         }
 
-        if ($dto->isActive() !== null) {
-            $query->where('is_active', $dto->isActive());
+        if ($dto->isActive !== null) {
+            $query->where('is_active', $dto->isActive);
         }
 
-        $sortConfig = self::SORT_MAP[$dto->sort()] ?? self::SORT_MAP['-created_at'];
+        $sortConfig = self::SORT_MAP[$dto->sort] ?? self::SORT_MAP['-created_at'];
         $query->orderBy($sortConfig[0], $sortConfig[1]);
 
         if ($sortConfig[0] !== 'id') {
             $query->orderBy('id', 'desc');
         }
 
-        return $query->paginate($dto->perPage());
+        return $query->paginate($dto->perPage);
     }
 
     public function findById(int $id): ?Waiter
@@ -79,9 +79,9 @@ final readonly class EloquentWaiterRepository implements WaiterRepositoryInterfa
     {
         /** @var Waiter $waiter */
         $waiter = $this->model->newQuery()->create([
-            'name' => $dto->name(),
-            'email' => $dto->email(),
-            'is_active' => $dto->isActive(),
+            'name' => $dto->name,
+            'email' => $dto->email,
+            'is_active' => $dto->isActive,
         ]);
 
         return $waiter;
@@ -90,9 +90,9 @@ final readonly class EloquentWaiterRepository implements WaiterRepositoryInterfa
     public function update(Waiter $waiter, UpdateWaiterDto $dto): Waiter
     {
         $waiter->update([
-            'name' => $dto->name(),
-            'email' => $dto->email(),
-            'is_active' => $dto->isActive(),
+            'name' => $dto->name,
+            'email' => $dto->email,
+            'is_active' => $dto->isActive,
         ]);
 
         /** @var Waiter $fresh */

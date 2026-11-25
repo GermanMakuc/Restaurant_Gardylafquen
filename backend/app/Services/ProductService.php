@@ -49,8 +49,8 @@ final class ProductService
 
     public function create(CreateProductDto $dto): Product
     {
-        if ($this->categories->findById($dto->categoryId()) === null) {
-            throw new CategoryNotFoundException($dto->categoryId());
+        if ($this->categories->findById($dto->categoryId) === null) {
+            throw new CategoryNotFoundException($dto->categoryId);
         }
 
         return $this->products->create($dto);
@@ -60,8 +60,8 @@ final class ProductService
     {
         $product = $this->findOrFail($id);
 
-        if ($this->categories->findById($dto->categoryId()) === null) {
-            throw new CategoryNotFoundException($dto->categoryId());
+        if ($this->categories->findById($dto->categoryId) === null) {
+            throw new CategoryNotFoundException($dto->categoryId);
         }
 
         return $this->products->update($product, $dto);
@@ -72,7 +72,7 @@ final class ProductService
         $product = $this->findOrFail($id);
         $disk = $this->filesystems->disk($this->imageDisk);
 
-        $encoded = $this->renderSquareJpeg($dto->image()->getRealPath());
+        $encoded = $this->renderSquareJpeg($dto->image->getRealPath());
 
         $newPath = 'products/' . $product->id . '-' . Str::random(20) . '.jpg';
         $disk->put($newPath, $encoded);

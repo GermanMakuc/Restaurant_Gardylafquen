@@ -19,7 +19,7 @@ final class HealthController extends Controller
     public function show(): JsonResponse
     {
         $status = $this->service->check();
-        $httpStatus = $status->database() === 'ok' ? 200 : 503;
+        $httpStatus = $status->database === 'ok' ? 200 : 503;
 
         return HealthResource::make($status)->response()->setStatusCode($httpStatus);
     }

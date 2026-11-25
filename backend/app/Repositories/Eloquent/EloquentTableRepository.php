@@ -37,18 +37,18 @@ final readonly class EloquentTableRepository implements TableRepositoryInterface
     {
         $query = $this->model->newQuery();
 
-        if ($dto->status() !== null) {
-            $query->where('status', $dto->status());
+        if ($dto->status !== null) {
+            $query->where('status', $dto->status);
         }
 
-        $sortConfig = self::SORT_MAP[$dto->sort()] ?? self::SORT_MAP['number'];
+        $sortConfig = self::SORT_MAP[$dto->sort] ?? self::SORT_MAP['number'];
         $query->orderBy($sortConfig[0], $sortConfig[1]);
 
         if ($sortConfig[0] !== 'id') {
             $query->orderBy('id', 'asc');
         }
 
-        return $query->paginate($dto->perPage());
+        return $query->paginate($dto->perPage);
     }
 
     public function findById(int $id): ?Table
@@ -84,10 +84,10 @@ final readonly class EloquentTableRepository implements TableRepositoryInterface
     {
         /** @var Table $table */
         $table = $this->model->newQuery()->create([
-            'number' => $dto->number(),
-            'label' => $dto->label(),
-            'capacity' => $dto->capacity(),
-            'status' => $dto->status(),
+            'number' => $dto->number,
+            'label' => $dto->label,
+            'capacity' => $dto->capacity,
+            'status' => $dto->status,
         ]);
 
         return $table;
@@ -96,10 +96,10 @@ final readonly class EloquentTableRepository implements TableRepositoryInterface
     public function update(Table $table, UpdateTableDto $dto): Table
     {
         $table->update([
-            'number' => $dto->number(),
-            'label' => $dto->label(),
-            'capacity' => $dto->capacity(),
-            'status' => $dto->status(),
+            'number' => $dto->number,
+            'label' => $dto->label,
+            'capacity' => $dto->capacity,
+            'status' => $dto->status,
         ]);
 
         /** @var Table $fresh */

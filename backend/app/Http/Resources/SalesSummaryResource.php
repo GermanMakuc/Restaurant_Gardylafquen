@@ -20,10 +20,10 @@ final class SalesSummaryResource extends JsonResource
     public function toArray($request): array
     {
         return [
-            'count' => $this->resource->count(),
-            'subtotal_cents' => $this->resource->subtotalCents(),
-            'tip_cents' => $this->resource->tipCents(),
-            'total_cents' => $this->resource->totalCents(),
+            'count' => $this->resource->count,
+            'subtotal_cents' => $this->resource->subtotalCents,
+            'tip_cents' => $this->resource->tipCents,
+            'total_cents' => $this->resource->totalCents,
         ];
     }
 }

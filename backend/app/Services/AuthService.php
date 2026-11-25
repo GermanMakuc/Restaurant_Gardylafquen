@@ -21,9 +21,9 @@ final class AuthService
 
     public function login(LoginDto $dto): AuthTokenDto
     {
-        $user = $this->auth->findByEmail($dto->email());
+        $user = $this->auth->findByEmail($dto->email);
 
-        if ($user === null || !$this->hasher->check($dto->password(), (string) $user->password)) {
+        if ($user === null || !$this->hasher->check($dto->password, (string) $user->password)) {
             throw new InvalidCredentialsException();
         }
 

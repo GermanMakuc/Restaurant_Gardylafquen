@@ -20,11 +20,10 @@ export const es = {
     pageTitle: 'Inicio | Restaurant Gardylafquen',
     heading: 'Panel principal',
     subtitle:
-      'Base de la nueva arquitectura desacoplada sobre API REST Laravel y frontend Astro con Tailwind CSS.',
+      'Gestión operativa de categorías, productos, mesas, meseros, órdenes y caja.',
     apiSectionTitle: 'Estado del servicio API',
-    modulesSectionTitle: 'Módulos planificados (Fase 2)',
+    modulesSectionTitle: 'Módulos del sistema',
     activeBadge: 'Disponible',
-    pendingBadge: 'Pendiente de migración',
     modules: [
       {
         name: 'Categorías',
